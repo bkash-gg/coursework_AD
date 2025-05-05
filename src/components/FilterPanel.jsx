@@ -15,20 +15,56 @@ const FilterPanel = () => {
         <label className="block text-sm font-medium mb-1">Availability</label>
         <div className="space-y-1 text-sm">
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" /> In Stock
+            <input type="radio" name="availability" className="form-radio" /> All Items
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" /> In Library
+            <input type="radio" name="availability" className="form-radio" /> In Stock
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="availability" className="form-radio" /> In Library
           </label>
         </div>
       </div>
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Genres</label>
-        <div className="space-y-1 text-sm max-h-32 overflow-auto">
-          {['Biography', 'Children', 'Fantasy', 'History', 'Mystery'].map((genre) => (
-            <label key={genre} className="flex items-center gap-2">
-              <input type="checkbox" className="form-checkbox" /> {genre}
+        <div className="space-y-1 text-sm">
+          {['Biography', 'Business', 'Children', 'Fantasy', 'Fiction', 'Mystery', 'Romance'].map((g) => (
+            <label key={g} className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" /> {g}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Formats</label>
+        <div className="space-y-1 text-sm">
+          {['Author', 'Collector', 'Deluxe', 'First', 'Hardcover', 'Limited', 'Paperback', 'Signed'].map((f) => (
+            <label key={f} className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" /> {f}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Languages</label>
+        <div className="space-y-1 text-sm">
+          {['English', 'Nepali', 'Sanskrit'].map((lang) => (
+            <label key={lang} className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" /> {lang}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Publishers</label>
+        <div className="space-y-1 text-sm">
+          {['Penguin', 'HarperCollins', 'Macmillan'].map((pub) => (
+            <label key={pub} className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" /> {pub}
             </label>
           ))}
         </div>
@@ -41,4 +77,4 @@ const FilterPanel = () => {
   );
 };
 
-export default FilterPanel; 
+export default FilterPanel;
