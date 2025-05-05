@@ -9,7 +9,7 @@ const Navbar = () => {
 
         <ul className="hidden md:flex space-x-6 text-gray-700">
           <li><Link to="/">Home</Link></li>
-          <li><Link to="/book-catalog">Book Catalog</Link></li>
+          <li><Link to="/BookCatalog">Book Catalog</Link></li>
           <li><Link to="/shop">Shop</Link></li>
           <li><Link to="/blog">Blog</Link></li>
           <li><Link to="/pages">Pages</Link></li>
