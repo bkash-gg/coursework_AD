@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-red-600">BOOKWORM</h1>
+        <h1 className="text-xl font-bold text-red-600">Book Hub</h1>
 
         <ul className="hidden md:flex space-x-6 text-gray-700">
           <li><Link to="/">Home</Link></li>
