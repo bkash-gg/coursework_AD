@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace AD_Coursework.Models
 {
@@ -20,11 +20,11 @@ namespace AD_Coursework.Models
         [Required]
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public required virtual User User { get; set; }
+        public virtual User User { get; set; } = null!;
 
         [Required]
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
-        public required virtual Book Book { get; set; }
+        public virtual Book Book { get; set; } = null!;
     }
 }

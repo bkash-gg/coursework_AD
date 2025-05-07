@@ -16,29 +16,49 @@ namespace AD_Coursework.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [DataType(DataType.DateTime)]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-
+        
         [Required]
-        [StringLength(20)]
-        public required string ClaimCode { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         [Range(0, double.MaxValue)]
         public decimal Subtotal { get; set; }
-
+        
         [Range(0, double.MaxValue)]
         public decimal DiscountAmount { get; set; } = 0;
-
+        
+        [Range(0, 100)]
+        public decimal DiscountPercentage { get; set; } = 0;
+        
         [Range(0, double.MaxValue)]
         public decimal TotalAmount { get; set; }
 
+        public bool UsedBulkDiscount { get; set; } = false;
+
+        public bool UsedLoyaltyDiscount { get; set; } = false;
+
         [Required]
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        [StringLength(30)]
+        public string ClaimCode { get; set; } = string.Empty;
+        
+        [StringLength(200)]
+        public string PickupNotes { get; set; } = string.Empty;
+        
+        public DateTime? PickupDate { get; set; }
+        
+        [StringLength(50)]
+        public string PaymentMethod { get; set; } = "In-Store";
+
+        public DateTime? CancellationDate { get; set; }
+        
+        public string? CancellationReason { get; set; }
+        
+        public DateTime? CompletionDate { get; set; }
 
         [Required]
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public required virtual User User { get; set; }
+        public virtual User User { get; set; } = null!;
 
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }

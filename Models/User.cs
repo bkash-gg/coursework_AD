@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace AD_Coursework.Models
 {
@@ -8,7 +8,7 @@ namespace AD_Coursework.Models
     {
         [Required]
         [StringLength(100)]
-        public required string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         [DataType(DataType.Date)]
         public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
@@ -16,10 +16,14 @@ namespace AD_Coursework.Models
         [StringLength(255)]
         public string? Address { get; set; }
 
+        public int TotalOrdersCompleted { get; set; } = 0;
+
+        public bool IsEligibleForLoyaltyDiscount { get; set; } = false;
+
         [Required]
         [ForeignKey("Role")]
         public Guid RoleId { get; set; }
-        public virtual Role Role { get; set; }
+        public virtual Role Role { get; set; } = null!;
 
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
@@ -28,5 +32,7 @@ namespace AD_Coursework.Models
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         public virtual ICollection<WhitelistItem> WhitelistItems { get; set; } = new List<WhitelistItem>();
+
+        public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AD_Coursework.Models
 {
@@ -10,11 +9,11 @@ namespace AD_Coursework.Models
 
         [Required]
         [StringLength(50)]
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(200)]
-        public string Description { get; set; } = null!;
+        public string Description { get; set; } = string.Empty;
 
         public virtual ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
     }

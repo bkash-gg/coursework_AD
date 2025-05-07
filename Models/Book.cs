@@ -9,30 +9,35 @@ namespace AD_Coursework.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [StringLength(100)]
-        public required string Title { get; set; }
+        [StringLength(50)]
+        public string Title { get; set; } = string.Empty;
 
-        [Required, StringLength(13)]
-        public required string ISBN { get; set; }
+        [Required]
+        [StringLength(13)]
+        public string ISBN { get; set; } = string.Empty;
 
+        [Required]
         public DateTime PublicationDate { get; set; }
 
         [Required]
         [StringLength(50)]
-        public required string Language { get; set; }
+        public string Language { get; set; } = string.Empty;
 
         [Required]
-        public required string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
+        [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
 
+        [Required]
         public int StockQuantity { get; set; }
 
         public bool IsAvailable { get; set; }
 
         [Required]
         [StringLength(20)]
-        public required string Format { get; set; }
+        public string Format { get; set; } = string.Empty;
 
         public string? CoverImageUrl { get; set; }
 
@@ -43,12 +48,12 @@ namespace AD_Coursework.Models
         [Required]
         [ForeignKey("Publisher")]
         public Guid PublisherId { get; set; }
-        public required virtual Publisher Publisher { get; set; }
+        public virtual Publisher Publisher { get; set; } = null!;
 
         [Required]
         [ForeignKey("Author")]
         public Guid AuthorId { get; set; }
-        public required virtual Author Author { get; set; }
+        public virtual Author Author { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

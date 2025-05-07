@@ -28,26 +28,31 @@ namespace AD_Coursework.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime?>("EndDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -61,17 +66,18 @@ namespace AD_Coursework.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Bio")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -138,8 +144,8 @@ namespace AD_Coursework.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -171,6 +177,12 @@ namespace AD_Coursework.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("ItemCount")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("numeric");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
@@ -192,6 +204,9 @@ namespace AD_Coursework.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
 
                     b.HasKey("CartId", "BookId");
 
@@ -246,22 +261,74 @@ namespace AD_Coursework.Migrations
                     b.ToTable("Genres");
                 });
 
+            modelBuilder.Entity("AD_Coursework.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("AD_Coursework.Models.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("CancellationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("ClaimCode")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("numeric");
 
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("PickupDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PickupNotes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -271,6 +338,12 @@ namespace AD_Coursework.Migrations
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
+
+                    b.Property<bool>("UsedBulkDiscount")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("UsedLoyaltyDiscount")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -314,18 +387,18 @@ namespace AD_Coursework.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -398,21 +471,21 @@ namespace AD_Coursework.Migrations
                         new
                         {
                             Id = new Guid("9f3b53b8-13e9-4c66-b45e-6c56d0b0d6db"),
-                            ConcurrencyStamp = "2829a150-9dd1-4617-9e4c-76f2341a5248",
+                            ConcurrencyStamp = "2e9d1ca2-83fd-44cd-80b5-5f2ca8f8a573",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = new Guid("a87642e3-e4cd-45f4-8c6d-1a1f5f6c6709"),
-                            ConcurrencyStamp = "bd65241f-f29c-4690-9a0a-2e556a9ceeb5",
+                            ConcurrencyStamp = "1f9f8489-4b06-464a-8122-3dbd955e7f82",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         },
                         new
                         {
                             Id = new Guid("b8fd98e7-3a5b-4275-b4bb-8c7ccda0d6b0"),
-                            ConcurrencyStamp = "9135c6d1-5df1-4650-868e-c614b0d727f4",
+                            ConcurrencyStamp = "3f39bee8-26a3-409f-ba1e-1d3a3f90f8fa",
                             Name = "Member",
                             NormalizedName = "MEMBER"
                         });
@@ -447,6 +520,9 @@ namespace AD_Coursework.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsEligibleForLoyaltyDiscount")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -479,6 +555,9 @@ namespace AD_Coursework.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<int>("TotalOrdersCompleted")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -502,43 +581,47 @@ namespace AD_Coursework.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f8cbcbd0-f41a-4c6f-9fb8-aea7094c8f60"),
+                            Id = new Guid("c4ca2613-69c6-4689-989a-c8d93037c93e"),
                             AccessFailedCount = 0,
                             Address = "Kathmandu, Nepal",
-                            ConcurrencyStamp = "a301cafa-d815-4d1f-a3fc-e10c6dab0250",
+                            ConcurrencyStamp = "ee81d9ce-806d-40f1-95ba-641b32ccbffb",
                             Email = "admin@bookstore.com",
                             EmailConfirmed = true,
                             FullName = "System Administrator",
+                            IsEligibleForLoyaltyDiscount = false,
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@BOOKSTORE.COM",
                             NormalizedUserName = "ADMIN@BOOKSTORE",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIWYjmXdNbKzqx3NpbKk0ptlj9GuSCdXb1ez4LYQWwbUtsZcf4LJT80LRZ5cUR3KOw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELJrJRaeIdQtdGz9BEEOwU3y1U0CkNpg8L91NGHI3+i14iY8XamphKLlI69Ai56H0g==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            RegistrationDate = new DateTime(2025, 5, 5, 21, 4, 6, 54, DateTimeKind.Utc).AddTicks(7593),
+                            RegistrationDate = new DateTime(2025, 5, 7, 15, 14, 48, 720, DateTimeKind.Utc).AddTicks(1728),
                             RoleId = new Guid("9f3b53b8-13e9-4c66-b45e-6c56d0b0d6db"),
-                            SecurityStamp = "eaf31b0b-96f9-4c5e-bdc8-2b67613b2901",
+                            SecurityStamp = "6f8117a6-8a9d-4c99-ad7c-007cfc6d045b",
+                            TotalOrdersCompleted = 0,
                             TwoFactorEnabled = false,
                             UserName = "admin@bookstore"
                         },
                         new
                         {
-                            Id = new Guid("880f2107-27af-44f5-80d7-489e2d980e26"),
+                            Id = new Guid("69daaad5-eac4-4c6f-ab7c-cafce1b7889c"),
                             AccessFailedCount = 0,
                             Address = "Kathmandu, Nepal",
-                            ConcurrencyStamp = "50da9f29-9ea4-4181-a16e-16d8b6778b6b",
+                            ConcurrencyStamp = "42e44fe7-797a-416b-893d-66761c9e9c30",
                             Email = "staff@bookstore.com",
                             EmailConfirmed = true,
                             FullName = "Bookstore Staff",
+                            IsEligibleForLoyaltyDiscount = false,
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF@BOOKSTORE.COM",
                             NormalizedUserName = "STAFF@BOOKSTORE",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJbf+0fMbuImsYGUJ/k1N9e+fuuwcL1YPSNXOE68lceHBCYoDdGylDL9u58kP8WD0A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFEnhLYQMBe58bhKEo5uG8c2AVzcFKJoTH/9MADUKHXQJ2pnX5ftxJmfJtAfUYaNtg==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            RegistrationDate = new DateTime(2025, 5, 5, 21, 4, 6, 95, DateTimeKind.Utc).AddTicks(9238),
+                            RegistrationDate = new DateTime(2025, 5, 7, 15, 14, 48, 760, DateTimeKind.Utc).AddTicks(8317),
                             RoleId = new Guid("a87642e3-e4cd-45f4-8c6d-1a1f5f6c6709"),
-                            SecurityStamp = "fdfe0e04-0767-417e-a197-0680918a093c",
+                            SecurityStamp = "1ff9fefa-a235-4075-b400-c4aed916717c",
+                            TotalOrdersCompleted = 0,
                             TwoFactorEnabled = false,
                             UserName = "staff@bookstore"
                         });
@@ -750,6 +833,17 @@ namespace AD_Coursework.Migrations
                     b.Navigation("Book");
                 });
 
+            modelBuilder.Entity("AD_Coursework.Models.Notification", b =>
+                {
+                    b.HasOne("AD_Coursework.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AD_Coursework.Models.Order", b =>
                 {
                     b.HasOne("AD_Coursework.Models.User", "User")
@@ -928,6 +1022,8 @@ namespace AD_Coursework.Migrations
             modelBuilder.Entity("AD_Coursework.Models.User", b =>
                 {
                     b.Navigation("Cart");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Orders");
 

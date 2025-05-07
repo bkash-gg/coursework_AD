@@ -13,16 +13,14 @@ namespace AD_Coursework.Models
         public float DiscountPercentage { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
-        public DateTime StartDate { get; set; } = DateTime.UtcNow;
+        public DateTime StartDate { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
         public DateTime EndDate { get; set; }
 
         [Required]
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
-        public required virtual Book Book { get; set; } 
+        public virtual Book Book { get; set; } = null!;
     }
 }

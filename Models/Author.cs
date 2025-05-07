@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AD_Coursework.Models
 {
@@ -9,17 +8,17 @@ namespace AD_Coursework.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [StringLength(100)]
-        public string Name { get; set; } = null!;
+        [StringLength(50)]
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(200)]
+        [StringLength(100)]
         [EmailAddress]
-        public string Email { get; set; } = null!;
+        public string Email { get; set; } = string.Empty;
 
-        [Column(TypeName = "text")]
-        public string? Bio { get; set; }  
+        [StringLength(200)]
+        public string? Bio { get; set; }
 
-        public ICollection<Book> Books { get; set; } = new List<Book>();
+        public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }
 }

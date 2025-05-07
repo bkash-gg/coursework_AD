@@ -8,22 +8,22 @@ namespace AD_Coursework.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
+        [StringLength(50)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
         [StringLength(100)]
-        public required string Name { get; set; }
-
-        [Required]
-        [StringLength(200)]
         [EmailAddress]
-        public required string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(500)]
-        public string Address { get; set; } = null!;
+        [StringLength(100)]
+        public string Address { get; set; } = string.Empty;
 
         [Required]
         [StringLength(15)]
         [Phone]
-        public string PhoneNumber { get; set; } = null!;
+        public string PhoneNumber { get; set; } = string.Empty;
 
         public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }

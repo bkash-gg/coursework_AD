@@ -17,5 +17,8 @@ namespace AD_Coursework.Models
 
         [Required]
         public int Quantity { get; set; }
+
+        [Range(0, double.MaxValue)]
+        public decimal UnitPrice { get; set; }
     }
 }

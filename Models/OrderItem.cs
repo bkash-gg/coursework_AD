@@ -8,12 +8,12 @@ namespace AD_Coursework.Models
         [Required]
         [ForeignKey("Order")]
         public Guid OrderId { get; set; }
-        public required virtual Order Order { get; set; }
+        public virtual Order Order { get; set; } = null!;
 
         [Required]
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
-        public required virtual Book Book { get; set; }
+        public virtual Book Book { get; set; } = null!;
 
         [Required]
         [Range(1, int.MaxValue)]
