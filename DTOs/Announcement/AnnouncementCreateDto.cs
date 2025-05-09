@@ -10,13 +10,13 @@ namespace AD_Coursework.DTOs.Announcement
 
         [Required(ErrorMessage = "Announcement Content is required.")]
         [StringLength(1000, ErrorMessage = "Announcement Content cannot exceed 1000 characters.")]
-        public string Content { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Start Date is required.")]
         public DateTime StartDate { get; set; }
-
+            
         [Required(ErrorMessage = "End Date is required.")]
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         [Required(ErrorMessage = "Announcement Type is required.")]
         public string Type { get; set; } = string.Empty;

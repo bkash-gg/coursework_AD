@@ -4,11 +4,9 @@
     {
         public Guid Id { get; set; }
         public int Rating { get; set; }
-        public string Comment { get; set; }
+        public string? Comment { get; set; }
         public DateTime CreatedAt { get; set; }
         public Guid UserId { get; set; }
-        public string UserFullName { get; set; }
         public Guid BookId { get; set; }
-        public string BookTitle { get; set; }
     }
 }

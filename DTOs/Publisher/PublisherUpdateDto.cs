@@ -4,22 +4,22 @@ namespace AD_Coursework.DTOs.Publisher
 {
     public class PublisherUpdateDto
     {
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
+        [Required(ErrorMessage = "Publisher Name is required.")]
+        [StringLength(50, ErrorMessage = "Publisher Name cannot exceed 50 characters.")]
+        public string Name { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(200)]
-        [EmailAddress]
-        public string Email { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+        public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(500)]
-        public string Address { get; set; }
+        [Required(ErrorMessage = "Address is required.")]
+        [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters.")]
+        public string Address { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(15)]
-        [Phone]
-        public string PhoneNumber { get; set; }
+        [Required(ErrorMessage = "Phone Number is required.")]
+        [StringLength(15, ErrorMessage = "Phone Number cannot exceed 15 characters.")]
+        [Phone(ErrorMessage = "Please enter a valid phone number.")]
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }

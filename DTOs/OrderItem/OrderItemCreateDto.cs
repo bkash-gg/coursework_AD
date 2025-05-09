@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AD_Coursework.DTOs.CartItem
+namespace AD_Coursework.DTOs.OrderItem
 {
-    public class CartItemUpdateDto
+    public class OrderItemCreateDto
     {
         [Required(ErrorMessage = "Book ID is required.")]
         public Guid BookId { get; set; }
