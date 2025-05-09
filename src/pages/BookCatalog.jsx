@@ -16,7 +16,7 @@ const mockBooks = new Array(20).fill(0).map((_, i) => ({
   publisher: ['Penguin', 'HarperCollins', 'Macmillan'][i % 3],
   language: ['English', 'Nepali', 'Sanskrit'][i % 3],
   discount: i % 3 === 0 ? `${10 + i % 3 * 5}%` : null,
-  img: `https://via.placeholder.com/150x220?text=Book+${i + 1}`,
+  img: "/book3.jpg",
   isBestseller: i % 5 === 0,
   isAwardWinner: i % 7 === 0,
   isNewRelease: i > 15,
