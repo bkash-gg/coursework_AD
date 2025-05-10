@@ -157,7 +157,7 @@ namespace AD_Coursework.Data
                 .HasMany(b => b.Reviews)
                 .WithOne(r => r.Book)
                 .HasForeignKey(r => r.BookId)
-                .OnDelete(DeleteBehavior.Cascade);         
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void SeedRoles(ModelBuilder modelBuilder)

@@ -1,5 +1,6 @@
 using AD_Coursework;
 using AD_Coursework.Data;
+using AD_Coursework.Mappings;
 using AD_Coursework.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(UserProfile));
 
 builder.Services.AddDbContext<ApplicationDbContext>(p => p.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<ApplicationDbContext>();
