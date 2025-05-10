@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import FilterPanel from '../components/FilterPanel';
 import CategoryTabs from '../components/CategoryTabs';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
-
+import Navbar from '../components/Navbar';
 const mockBooks = new Array(20).fill(0).map((_, i) => ({
   id: i + 1,
   title: `Book ${i + 1}`,
@@ -66,6 +66,7 @@ const BookCatalog = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <Navbar />
       <h1 className="text-3xl font-bold mb-6">Book Catalog</h1>
 
       <CategoryTabs

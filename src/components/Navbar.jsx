@@ -13,7 +13,9 @@ const Navbar = () => {
           <li><Link to="/shop" className="hover:text-red-600">Shop</Link></li>
           <li><Link to="/blog" className="hover:text-red-600">Blog</Link></li>
           <li><Link to="/pages" className="hover:text-red-600">Pages</Link></li>
+          <li><Link to="/admin/dashboard" className="hover:text-red-600 font-semibold">Admin</Link></li> {/* 🆕 */}
         </ul>
+
 
         <div className="hidden md:flex items-center space-x-4">
           <input
@@ -33,6 +35,7 @@ const Navbar = () => {
           >
             Sign Up
           </Link>
+          
         </div>
       </div>
     </nav>

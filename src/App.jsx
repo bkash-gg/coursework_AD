@@ -7,19 +7,32 @@ import SignUp from './pages/SignUp';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 
-
+// Admin Pages
+import AdminLayout from './pages/Admin/AdminLayout';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import Books from './pages/Admin/Books';
+import Orders from './pages/Admin/Orders';
+import Announcements from './pages/Admin/Announcements';
 
 function App() {
   return (
     <Router>
-      
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/BookCatalog" element={<BookCatalog />} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/signup" element={<SignUp/>} />
-        <Route path="/blog" element={<Blog/>} />
-        <Route path="/blog/:id" element={<BlogPost/>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogPost />} />
+
+        {/* Admin Routes without Protection */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="books" element={<Books />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="announcements" element={<Announcements />} />
+        </Route>
       </Routes>
     </Router>
   );
