@@ -8,9 +8,11 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 
 
+
 function App() {
   return (
     <Router>
+      
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/BookCatalog" element={<BookCatalog />} />

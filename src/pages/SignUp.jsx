@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { MdMail, MdLock, MdPerson, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md"
@@ -18,133 +16,146 @@ const SignUp = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
-      {/* Left column - Blue gradient background */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
-        {/* Decorative elements */}
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Left column - Enhanced background */}
+      <div className="hidden md:flex md:w-2/5 min-h-screen bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
+        {/* Animated decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white"></div>
-          <div className="absolute bottom-[30%] right-[10%] w-60 h-60 rounded-full bg-white"></div>
-          <div className="absolute top-[60%] left-[5%] w-20 h-20 rounded-full bg-white"></div>
+          <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white animate-float"></div>
+          <div className="absolute bottom-[30%] right-[10%] w-60 h-60 rounded-full bg-white animate-float-delayed"></div>
+          <div className="absolute top-[60%] left-[5%] w-20 h-20 rounded-full bg-white animate-pulse"></div>
         </div>
 
-        <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 shadow-xl relative z-10 transition-all duration-500 hover:scale-105">
-          {/* You can add an icon or image here if needed */}
-          <MdPerson className="text-white h-16 w-16 opacity-70" />
+        <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 shadow-xl relative z-10 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+          <MdPerson className="text-white h-20 w-20 opacity-90 animate-bounce-in" />
         </div>
-        <h2 className="text-4xl font-bold mb-4 relative z-10">Create Account</h2>
-        <p className="text-xl text-center max-w-md relative z-10">Join our community and start your journey</p>
+        <h2 className="text-4xl font-bold mb-4 relative z-10 animate-slide-in">Create Account</h2>
+        <p className="text-xl text-center max-w-md relative z-10 animate-slide-in-delayed">
+          Join our community and start your journey
+        </p>
       </div>
 
-      {/* Right column - Sign up form */}
-      <div className="flex flex-1 bg-white md:w-1/2 items-center justify-center shadow-lg">
+      {/* Right column - Enhanced form */}
+      <div className="flex-1 min-h-screen flex items-center justify-center bg-white/90 backdrop-blur-lg shadow-xl">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
-          <div className="mb-12 text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Sign Up for BookWorm</h1>
-            <p className="text-gray-500">Create your account to get started</p>
+          <div className="mb-12 text-center animate-fade-in">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
+              Sign Up for BookWorm
+            </h1>
+            <p className="text-gray-500 mt-1">Create your account to get started</p>
           </div>
-          {/* Sign up form */}
-          <form className="space-y-6">
-            <div className="space-y-2 relative">
-              <label className="block text-gray-700 font-medium absolute -top-7 bg-white px-1  text-md transition-all duration-200" htmlFor="email">
-                Email
+
+          {/* Enhanced sign up form */}
+          <form className="space-y-6 animate-fade-in-up">
+            {/* Email Input */}
+            <div className="group relative">
+              <input
+                type="email"
+                id="email"
+                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                placeholder=" "
+                required
+              />
+              <label 
+                htmlFor="email"
+                className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
+              >
+                Email Address
               </label>
-              <div className="relative group">
-                <MdMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-hover:text-[#3B6CF7] transition-colors duration-200" />
-                <input
-                  type="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6CF7] focus:border-[#3B6CF7] bg-white shadow-sm transition-all duration-200 hover:border-gray-400"
-                  required
-                />
-              </div>
+              <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
             </div>
 
-            <div className="space-y-2 relative">
-              <label className="block text-gray-700 font-medium absolute -top-7 bg-white px-1 text-md transition-all duration-200" htmlFor="username">
+            {/* Username Input */}
+            <div className="group relative">
+              <input
+                type="text"
+                id="username"
+                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                placeholder=" "
+                required
+              />
+              <label 
+                htmlFor="username"
+                className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
+              >
                 Username
               </label>
-              <div className="relative group">
-                <MdPerson className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-hover:text-[#3B6CF7] transition-colors duration-200" />
-                <input
-                  type="text"
-                  id="username"
-                  placeholder="Enter your username"
-                  className="w-full px-4 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6CF7] focus:border-[#3B6CF7] bg-white shadow-sm transition-all duration-200 hover:border-gray-400"
-                  required
-                />
-              </div>
+              <MdPerson className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
             </div>
 
-            <div className="space-y-2 relative">
-              <label className="block text-gray-700 font-medium absolute -top-7" htmlFor="password">
+            {/* Password Input */}
+            <div className="group relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                placeholder=" "
+                required
+              />
+              <label 
+                htmlFor="password"
+                className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
+              >
                 Password
               </label>
-              <div className="relative group">
-                <MdLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-hover:text-[#3B6CF7] transition-colors duration-200" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  placeholder="Enter your password"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6CF7] focus:border-[#3B6CF7] bg-white shadow-sm transition-all duration-200 hover:border-gray-400"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                >
-                  {showPassword ? (
-                    <MdOutlineVisibilityOff className="h-5 w-5" />
-                  ) : (
-                    <MdOutlineVisibility className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
+              <MdLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3B6CF7] transition-colors duration-300"
+              >
+                {showPassword ? (
+                  <MdOutlineVisibilityOff className="h-6 w-6" />
+                ) : (
+                  <MdOutlineVisibility className="h-6 w-6" />
+                )}
+              </button>
             </div>
 
-            <div className="space-y-2 relative">
-              <label className="block text-gray-700 font-medium absolute -top-7" htmlFor="confirm-password">
+            {/* Confirm Password Input */}
+            <div className="group relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirm-password"
+                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                placeholder=" "
+                required
+              />
+              <label 
+                htmlFor="confirm-password"
+                className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
+              >
                 Confirm Password
               </label>
-              <div className="relative group">
-                <MdLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-hover:text-[#3B6CF7] transition-colors duration-200" />
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirm-password"
-                  placeholder="Confirm your password"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6CF7] focus:border-[#3B6CF7] bg-white shadow-sm transition-all duration-200 hover:border-gray-400"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={toggleConfirmPasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                >
-                  {showConfirmPassword ? (
-                    <MdOutlineVisibilityOff className="h-5 w-5" />
-                  ) : (
-                    <MdOutlineVisibility className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
+              <MdLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3B6CF7] transition-colors duration-300"
+              >
+                {showConfirmPassword ? (
+                  <MdOutlineVisibilityOff className="h-6 w-6" />
+                ) : (
+                  <MdOutlineVisibility className="h-6 w-6" />
+                )}
+              </button>
             </div>
 
             <Button
               type="submit"
-              className="w-full py-3.5 bg-[#3B6CF7] hover:bg-[#2A5CE4] text-white font-medium rounded-lg text-center transition-all duration-300 shadow-md hover:shadow-lg mt-4 transform hover:-translate-y-0.5"
+              className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30"
             >
               Create Account
             </Button>
           </form>
 
-          <div className="mt-10 text-center">
+          {/* Enhanced footer */}
+          <div className="mt-10 text-center animate-fade-in">
             <p className="text-gray-600">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-[#3B6CF7] hover:text-[#2A5CE4] font-medium transition-colors duration-200"
+                className="font-medium bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent hover:underline"
               >
                 Sign in
               </Link>
@@ -157,4 +168,3 @@ const SignUp = () => {
 }
 
 export default SignUp
-
