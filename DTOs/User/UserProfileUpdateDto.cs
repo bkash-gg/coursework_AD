@@ -5,16 +5,17 @@ namespace AD_Coursework.DTOs.User
     public class UserProfileUpdateDto
     {
         [Required(ErrorMessage = "Username is required.")]
-        [StringLength(100, ErrorMessage = "Username cannot exceed 100 characters.")]
+        [StringLength(100, ErrorMessage = "Username must not exceed 100 characters.")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores.")]
         public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Full name is required.")]
-        [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters.")]
-        public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
         public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Full name is required.")]
+        [StringLength(100, ErrorMessage = "Full name must not exceed 100 characters.")]
+        public string FullName { get; set; } = string.Empty;
 
         [Phone(ErrorMessage = "Invalid phone number format.")]
         [StringLength(20, ErrorMessage = "Phone number can't exceed 20 characters.")]
