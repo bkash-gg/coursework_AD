@@ -159,6 +159,13 @@ namespace AD_Coursework.Data
                 .WithOne(r => r.Book)
                 .HasForeignKey(r => r.BookId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure the relationship between User and RefreshToken models
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.RefreshTokens)
+                .WithOne(rt => rt.User)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void SeedRoles(ModelBuilder modelBuilder)

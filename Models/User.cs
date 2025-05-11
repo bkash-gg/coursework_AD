@@ -6,7 +6,6 @@ namespace AD_Coursework.Models
 {
     public class User : IdentityUser<Guid>
     {
-        [Required]
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
 
@@ -19,6 +18,10 @@ namespace AD_Coursework.Models
         public int TotalOrdersCompleted { get; set; } = 0;
 
         public bool IsEligibleForLoyaltyDiscount { get; set; } = false;
+
+        public string? RefreshToken { get; set; }
+
+        public DateTime? RefreshTokenExpiry { get; set; }
 
         [Required]
         [ForeignKey("Role")]
@@ -34,5 +37,7 @@ namespace AD_Coursework.Models
         public virtual ICollection<WhitelistItem> WhitelistItems { get; set; } = new List<WhitelistItem>();
 
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

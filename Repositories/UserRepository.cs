@@ -1,84 +1,103 @@
-﻿using AD_Coursework.Data;
-using AD_Coursework.Models;
-using AD_Coursework.Repositories.Interfaces;
+﻿using AD_Coursework.Interfaces.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AD_Coursework.Models;
+using AD_Coursework.Data;
 
 namespace AD_Coursework.Repositories
 {
-    public class UserRepository : RepositoryBase<User>, IUserRepository
+    public class UserRepository : IUserRepository
     {
-        public UserRepository(ApplicationDbContext dbContext) : base(dbContext)
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
+
+        public UserRepository(ApplicationDbContext context, UserManager<User> userManager)
         {
+            _context = context;
+            _userManager = userManager;
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<User?> GetUserByIdAsync(Guid id)
         {
-            return await _dbContext.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            return await _userManager.FindByIdAsync(id.ToString());
         }
 
-        public async Task<User?> GetByUsernameAsync(string username)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _dbContext.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserName == username);
+            return await _userManager.FindByEmailAsync(email);
         }
 
-        public async Task<User?> GetByIdWithRoleAsync(Guid id)
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            return await _dbContext.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Id == id);
+            return await _userManager.FindByNameAsync(username);
         }
 
-        public async Task<IEnumerable<User>> GetPaginatedUsersAsync(int page, int pageSize)
+        public async Task<User> CreateUserAsync(User user, string password)
         {
-            return await _dbContext.Users
-                .Include(u => u.Role)
-                .OrderBy(u => u.UserName)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-        }
-
-        public async Task<int> GetTotalUsersCountAsync()
-        {
-            return await _dbContext.Users.CountAsync();
-        }
-
-        public async Task<bool> IsEmailUniqueAsync(string email, Guid? excludeUserId = null)
-        {
-            if (excludeUserId.HasValue)
+            var result = await _userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
             {
-                return !await _dbContext.Users.AnyAsync(u =>
-                    u.Email == email && u.Id != excludeUserId.Value);
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception($"User creation failed: {errors}");
             }
 
-            return !await _dbContext.Users.AnyAsync(u => u.Email == email);
+            return user;
         }
 
-        public async Task<bool> IsUsernameUniqueAsync(string username, Guid? excludeUserId = null)
+        public async Task<bool> UpdateUserAsync(User user)
         {
-            if (excludeUserId.HasValue)
-            {
-                return !await _dbContext.Users.AnyAsync(u =>
-                    u.UserName == username && u.Id != excludeUserId.Value);
-            }
-
-            return !await _dbContext.Users.AnyAsync(u => u.UserName == username);
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
         }
 
-        public async Task UpdateLoyaltyStatusAsync(Guid userId)
+        public async Task<bool> DeleteUserAsync(Guid id)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
-            if (user != null)
-            {
-                // Example loyalty logic: If completed orders >= 5, enable loyalty discount
-                user.IsEligibleForLoyaltyDiscount = user.TotalOrdersCompleted >= 5;
-                _dbContext.Users.Update(user);
-                await _dbContext.SaveChangesAsync();
-            }
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return false;
+
+            var result = await _userManager.DeleteAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+        {
+            return await _context.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == token);
+        }
+
+        public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            _context.RefreshTokens.Update(refreshToken);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> UserExistsAsync(string username)
+        {
+            return await _userManager.FindByNameAsync(username) != null;
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email) != null;
+        }
+
+        public async Task<bool> IsEmailConfirmedAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return user?.EmailConfirmed ?? false;
+        }
+
+        public async Task<bool> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+        {
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            return result.Succeeded;
         }
     }
 }
