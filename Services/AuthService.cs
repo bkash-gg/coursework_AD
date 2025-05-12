@@ -112,9 +112,10 @@ namespace AD_Coursework.Services
                     }
                 };
             }
+            var role = await _userRepository.GetUserRoleNameAsync(user.Id);
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
-            var claims = _jwtHandler.GetClaims(user);
+            var claims = _jwtHandler.GetClaims(user, role);
             var tokenOptions = _jwtHandler.GenerateTokenOptions(signingCredentials, claims);
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
@@ -124,8 +125,6 @@ namespace AD_Coursework.Services
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiry = refreshTokenExpiry;
             await _userManager.UpdateAsync(user);
-
-            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Member";
 
             return new UserLoginResponseDto
             {
@@ -288,7 +287,7 @@ namespace AD_Coursework.Services
                         Message = "Profile update failed",
                     };
                 }
-                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Member";
+                var role = await _userRepository.GetUserRoleNameAsync(user.Id);
                 return new AuthResponseDto
                 {
                     IsSuccess = true,
@@ -321,9 +320,10 @@ namespace AD_Coursework.Services
                     Message = "Invalid token or refresh token."
                 };
             }
+            var role = await _userRepository.GetUserRoleNameAsync(user.Id);
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
-            var claims = _jwtHandler.GetClaims(user);
+            var claims = _jwtHandler.GetClaims(user, role);
             var tokenOptions = _jwtHandler.GenerateTokenOptions(signingCredentials, claims);
             var newToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             var newRefreshToken = _jwtHandler.GenerateRefreshToken();

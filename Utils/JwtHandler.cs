@@ -27,7 +27,7 @@ namespace AD_Coursework.Utils
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
 
-        public List<Claim> GetClaims(User user)
+        public List<Claim> GetClaims(User user, string role)
         {
             var claims = new List<Claim>
             {

@@ -99,5 +99,14 @@ namespace AD_Coursework.Repositories
             var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
             return result.Succeeded;
         }
+
+        public async Task<string?> GetUserRoleNameAsync(Guid userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user?.Role?.Name;
+        }
     }
 }

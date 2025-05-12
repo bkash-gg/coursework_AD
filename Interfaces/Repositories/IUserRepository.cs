@@ -17,5 +17,6 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<bool> EmailExistsAsync(string email);
         Task<bool> IsEmailConfirmedAsync(string email);
         Task<bool> ChangePasswordAsync(User user, string currentPassword, string newPassword);
+        Task<string?> GetUserRoleNameAsync(Guid userId);
     }
 }
