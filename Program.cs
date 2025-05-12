@@ -2,7 +2,6 @@ using AD_Coursework;
 using AD_Coursework.Data;
 using AD_Coursework.Interfaces.Repositories;
 using AD_Coursework.Interfaces.Services;
-using AD_Coursework.Middleware;
 using AD_Coursework.Models;
 using AD_Coursework.Repositories;
 using AD_Coursework.Services;
@@ -75,6 +74,8 @@ builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+builder.Services.AddScoped<IGenreService, GenreService>();
 
 var app = builder.Build();
 
