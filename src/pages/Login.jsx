@@ -92,6 +92,12 @@ const Login = () => {
               </button>
             </div>
 
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-[#3B6CF7] hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
+
             <Button
               type="submit"
               className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30"
@@ -117,7 +123,5 @@ const Login = () => {
     </div>
   )
 }
-
-
 
 export default Login
