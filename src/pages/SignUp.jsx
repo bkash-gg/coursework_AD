@@ -1,11 +1,57 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { MdMail, MdLock, MdPerson, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md"
 import Button from "../components/Button"
+import authService from "../services/authService"
 
 const SignUp = () => {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  })
+
+  const handleChange = (e) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
+    setError("") // Clear error when user types
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match")
+      setLoading(false)
+      return
+    }
+
+    try {
+      const response = await authService.register({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password
+      })
+      
+      // If registration is successful, redirect to login
+      navigate("/login", { 
+        state: { message: "Registration successful! Please login." }
+      })
+    } catch (error) {
+      setError(error.message || "Registration failed. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
@@ -46,7 +92,13 @@ const SignUp = () => {
           </div>
 
           {/* Enhanced sign up form */}
-          <form className="space-y-6 animate-fade-in-up">
+          <form className="space-y-6 animate-fade-in-up" onSubmit={handleSubmit}>
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            
             {/* Email Input */}
             <div className="group relative">
               <input
@@ -54,6 +106,8 @@ const SignUp = () => {
                 id="email"
                 className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
               <label 
@@ -72,6 +126,8 @@ const SignUp = () => {
                 id="username"
                 className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                value={formData.username}
+                onChange={handleChange}
                 required
               />
               <label 
@@ -90,6 +146,8 @@ const SignUp = () => {
                 id="password"
                 className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                value={formData.password}
+                onChange={handleChange}
                 required
               />
               <label 
@@ -116,13 +174,15 @@ const SignUp = () => {
             <div className="group relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                id="confirm-password"
+                id="confirmPassword"
                 className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                value={formData.confirmPassword}
+                onChange={handleChange}
                 required
               />
               <label 
-                htmlFor="confirm-password"
+                htmlFor="confirmPassword"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
                 Confirm Password
@@ -143,9 +203,10 @@ const SignUp = () => {
 
             <Button
               type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30"
+              disabled={loading}
+              className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
