@@ -16,7 +16,6 @@ namespace AD_Coursework.Interfaces.Services
         Task<(IEnumerable<BookDto> Books, int TotalCount)> GetNewArrivalsAsync(int page, int pageSize);
         Task<(IEnumerable<BookDto> Books, int TotalCount)> GetBestSellersAsync(int page, int pageSize);
         Task<(IEnumerable<BookDto> Books, int TotalCount)> GetAwardWinnersAsync(int page, int pageSize);
-        Task<(IEnumerable<BookDto> Books, int TotalCount)> GetOnSaleBooksAsync(int page, int pageSize);
         Task<(IEnumerable<BookDto> Books, int TotalCount)> GetComingSoonBooksAsync(int page, int pageSize);
 
         // Filtering by relationships
@@ -36,19 +35,11 @@ namespace AD_Coursework.Interfaces.Services
             string? language,
             string? format,
             bool? isAvailable,
-            bool? isOnSale,
             bool? isAwardWinner,
             bool? isComingSoon,
             string? sortBy,
             bool ascending,
             int page,
             int pageSize);
-
-        // Inventory management
-        Task<bool> UpdateStockAsync(Guid id, int quantity);
-        Task<bool> SetAvailabilityAsync(Guid id, bool isAvailable);
-        Task<bool> SetOnSaleStatusAsync(Guid id, bool isOnSale);
-        Task<bool> SetAwardWinnerStatusAsync(Guid id, bool isAwardWinner);
-        Task<bool> SetComingSoonStatusAsync(Guid id, bool isComingSoon);
     }
 }

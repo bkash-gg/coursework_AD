@@ -122,9 +122,6 @@ namespace AD_Coursework.Migrations
                     b.Property<bool>("IsComingSoon")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsOnSale")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -500,21 +497,21 @@ namespace AD_Coursework.Migrations
                         new
                         {
                             Id = new Guid("9f3b53b8-13e9-4c66-b45e-6c56d0b0d6db"),
-                            ConcurrencyStamp = "c8008c26-aff5-4185-9bf1-735a3ca86fc5",
+                            ConcurrencyStamp = "07665b77-7e85-4086-9c57-b2a39e9c656c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = new Guid("a87642e3-e4cd-45f4-8c6d-1a1f5f6c6709"),
-                            ConcurrencyStamp = "3edd493b-18f1-43bb-af58-e73de92f2946",
+                            ConcurrencyStamp = "4d592b01-9f3e-4844-9500-e2f9bfc425f4",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         },
                         new
                         {
                             Id = new Guid("b8fd98e7-3a5b-4275-b4bb-8c7ccda0d6b0"),
-                            ConcurrencyStamp = "ef3f8dcf-c8c4-4e8d-a6aa-2bf96ae0817e",
+                            ConcurrencyStamp = "2e073091-dadc-408e-80b8-99247a3058e3",
                             Name = "Member",
                             NormalizedName = "MEMBER"
                         });
@@ -616,10 +613,10 @@ namespace AD_Coursework.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f0a030a0-48bb-413d-afc7-dc9e6cc335c2"),
+                            Id = new Guid("95e3fe7c-ecb2-41ea-8cfe-86740595c513"),
                             AccessFailedCount = 0,
                             Address = "Kathmandu, Nepal",
-                            ConcurrencyStamp = "ef0b95a2-77ed-4d77-8b6a-7ba79127ae11",
+                            ConcurrencyStamp = "d269b20f-bbd8-4848-8b5e-ba6c8bba0b1d",
                             Email = "admin@bookstore.com",
                             EmailConfirmed = true,
                             FullName = "System Administrator",
@@ -627,22 +624,22 @@ namespace AD_Coursework.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@BOOKSTORE.COM",
                             NormalizedUserName = "ADMIN@BOOKSTORE",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEZDi/BAAnQ+VPSSVM4uRBCZrjGA5RmpMKBElkP3vsRchO0KaPtL5GoSja79cZ8zww==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECnUtxonwIYje4VSNeJSTE/andSkmzs9zV3a0sl0lxEydoCAzkciNBKG9mbzc+E8fg==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            RegistrationDate = new DateTime(2025, 5, 11, 16, 11, 13, 24, DateTimeKind.Utc).AddTicks(5085),
+                            RegistrationDate = new DateTime(2025, 5, 12, 20, 18, 6, 63, DateTimeKind.Utc).AddTicks(4171),
                             RoleId = new Guid("9f3b53b8-13e9-4c66-b45e-6c56d0b0d6db"),
-                            SecurityStamp = "bc860e91-1b63-455f-af0d-0f4ac126027a",
+                            SecurityStamp = "971d5cb8-eff5-4b99-9097-054838d855ad",
                             TotalOrdersCompleted = 0,
                             TwoFactorEnabled = false,
                             UserName = "admin@bookstore"
                         },
                         new
                         {
-                            Id = new Guid("c28280f3-402d-4569-9b6e-3c976ee50345"),
+                            Id = new Guid("18341132-8b2f-4637-b76e-e60e4093472c"),
                             AccessFailedCount = 0,
                             Address = "Kathmandu, Nepal",
-                            ConcurrencyStamp = "ad331344-b535-4ab8-a38b-cd17e526cbd0",
+                            ConcurrencyStamp = "2145d63f-65e6-4c6c-9b5f-d654729e6ab8",
                             Email = "staff@bookstore.com",
                             EmailConfirmed = true,
                             FullName = "Bookstore Staff",
@@ -650,12 +647,12 @@ namespace AD_Coursework.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF@BOOKSTORE.COM",
                             NormalizedUserName = "STAFF@BOOKSTORE",
-                            PasswordHash = "AQAAAAIAAYagAAAAENrBNImGG8VAORjMYnWqYPurWQT2qVr412RiMKSAYHPk4Ss9x5dKTW2lgMctHt5+uQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGh+S1b/nFWffFIxSoJ18HWFHXccaFvb/n1y3tyb7Mi6NgbvgKrpLlbMT+RfHyCmLA==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            RegistrationDate = new DateTime(2025, 5, 11, 16, 11, 13, 66, DateTimeKind.Utc).AddTicks(6687),
+                            RegistrationDate = new DateTime(2025, 5, 12, 20, 18, 6, 103, DateTimeKind.Utc).AddTicks(9113),
                             RoleId = new Guid("a87642e3-e4cd-45f4-8c6d-1a1f5f6c6709"),
-                            SecurityStamp = "1aaafafe-9d64-494d-9866-74a9a938aa20",
+                            SecurityStamp = "f4dbfe27-db31-4309-8467-a6ef6d7c0d9b",
                             TotalOrdersCompleted = 0,
                             TwoFactorEnabled = false,
                             UserName = "staff@bookstore"

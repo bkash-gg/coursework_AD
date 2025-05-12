@@ -167,7 +167,8 @@ namespace AD_Coursework.Repositories
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
                 .Include(b => b.OrderItems)
-                .OrderByDescending(b => b.OrderItems.Count)
+                .Where(b => b.OrderItems.Any()) 
+                .OrderByDescending(b => b.OrderItems.Sum(oi => (int?)oi.Quantity) ?? 0)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -181,20 +182,6 @@ namespace AD_Coursework.Repositories
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
                 .Where(b => b.IsAwardWinner)
-                .OrderBy(b => b.Title)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Book>> GetOnSaleBooksAsync(int page, int pageSize)
-        {
-            return await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Publisher)
-                .Include(b => b.BookGenres)
-                    .ThenInclude(bg => bg.Genre)
-                .Where(b => b.IsOnSale)
                 .OrderBy(b => b.Title)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -242,7 +229,6 @@ namespace AD_Coursework.Repositories
             string? language,
             string? format,
             bool? isAvailable,
-            bool? isOnSale,
             bool? isAwardWinner,
             bool? isComingSoon,
             string? sortBy,
@@ -303,11 +289,6 @@ namespace AD_Coursework.Repositories
             if (isAvailable.HasValue)
             {
                 query = query.Where(b => b.IsAvailable == isAvailable.Value);
-            }
-
-            if (isOnSale.HasValue)
-            {
-                query = query.Where(b => b.IsOnSale == isOnSale.Value);
             }
 
             if (isAwardWinner.HasValue)
@@ -371,7 +352,6 @@ namespace AD_Coursework.Repositories
             string? language,
             string? format,
             bool? isAvailable,
-            bool? isOnSale,
             bool? isAwardWinner,
             bool? isComingSoon)
         {
@@ -424,11 +404,6 @@ namespace AD_Coursework.Repositories
             if (isAvailable.HasValue)
             {
                 query = query.Where(b => b.IsAvailable == isAvailable.Value);
-            }
-
-            if (isOnSale.HasValue)
-            {
-                query = query.Where(b => b.IsOnSale == isOnSale.Value);
             }
 
             if (isAwardWinner.HasValue)

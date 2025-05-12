@@ -26,7 +26,6 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<IEnumerable<Book>> GetNewArrivalsAsync(int page, int pageSize);
         Task<IEnumerable<Book>> GetBestSellersAsync(int page, int pageSize);
         Task<IEnumerable<Book>> GetAwardWinnersAsync(int page, int pageSize);
-        Task<IEnumerable<Book>> GetOnSaleBooksAsync(int page, int pageSize);
         Task<IEnumerable<Book>> GetComingSoonBooksAsync(int page, int pageSize);
 
         // Search and advanced filtering
@@ -41,7 +40,6 @@ namespace AD_Coursework.Interfaces.Repositories
             string? language,
             string? format,
             bool? isAvailable,
-            bool? isOnSale,
             bool? isAwardWinner,
             bool? isComingSoon,
             string? sortBy,
@@ -58,7 +56,6 @@ namespace AD_Coursework.Interfaces.Repositories
             string? language,
             string? format,
             bool? isAvailable,
-            bool? isOnSale,
             bool? isAwardWinner,
             bool? isComingSoon);
 

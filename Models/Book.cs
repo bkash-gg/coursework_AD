@@ -41,7 +41,6 @@ namespace AD_Coursework.Models
 
         public string? CoverImageUrl { get; set; }
 
-        public bool IsOnSale { get; set; }
         public bool IsAwardWinner { get; set; }
         public bool IsComingSoon { get; set; }
 

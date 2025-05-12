@@ -35,9 +35,7 @@ namespace AD_Coursework.DTOs.Book
         [StringLength(20, ErrorMessage = "Format cannot exceed 20 characters.")]
         public string Format { get; set; } = string.Empty;
 
-        public string? CoverImageUrl { get; set; }
-
-        public bool IsOnSale { get; set; }
+        public IFormFile? ImageFile { get; set; }
 
         public bool IsAwardWinner { get; set; }
 

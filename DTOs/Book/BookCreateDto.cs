@@ -35,13 +35,11 @@ namespace AD_Coursework.DTOs.Book
         [StringLength(20, ErrorMessage = "Format cannot exceed 20 characters.")]
         public string Format { get; set; } = string.Empty;
 
-        public string? CoverImageUrl { get; set; }
+        public IFormFile? ImageFile { get; set; }
 
-        public bool IsOnSale { get; set; } = false;
+        public bool IsAwardWinner { get; set; }
 
-        public bool IsAwardWinner { get; set; } = false;
-
-        public bool IsComingSoon { get; set; } = false;
+        public bool IsComingSoon { get; set; }
 
         [Required(ErrorMessage = "Publisher ID is required.")]
         public Guid PublisherId { get; set; }
