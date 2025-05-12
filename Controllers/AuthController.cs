@@ -24,22 +24,48 @@ namespace AD_Coursework.Controllers
         {
             try
             {
+                if (registrationDto == null)
+                {
+                    return Error(
+                        "Request body cannot be empty.",
+                        StatusCodes.Status400BadRequest
+                    );
+                }
+
                 if (!ModelState.IsValid)
                 {
-                    return ErrorResponse("Invalid data. Please check your details.", StatusCodes.Status400BadRequest, ModelState);
+                    return Error
+                    (
+                        "Invalid data. Please check your details.",
+                        StatusCodes.Status400BadRequest,
+                        ModelState
+                    );
                 }
 
                 var result = await _authService.RegisterAsync(registrationDto);
                 if (!result.IsSuccess)
                 {
-                    return ErrorResponse(result.Message ?? "Registration failed. Please try again.", StatusCodes.Status400BadRequest);
+                    return Error
+                    (
+                        result.Message ?? "Registration failed. Please try again.",
+                        StatusCodes.Status400BadRequest
+                    );
                 }
 
-                return SuccessResponse(result, "Registration successful!", StatusCodes.Status201Created);
+                return Success<Object>
+                (
+                    null, 
+                    "Registration successful!", 
+                    StatusCodes.Status201Created
+                );
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Something went wrong. Please try again.");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
 
@@ -48,21 +74,50 @@ namespace AD_Coursework.Controllers
         {
             try
             {
+                if (loginDto == null)
+                {
+                    return Error(
+                        "Request body cannot be empty.",
+                        StatusCodes.Status400BadRequest
+                    );
+                }
+
                 if (!ModelState.IsValid)
                 {
-                    return ErrorResponse("Invalid data. Please check your details.", StatusCodes.Status400BadRequest, ModelState);
+                    return Error
+                    (
+                        "Invalid login data",
+                        StatusCodes.Status400BadRequest,
+                        ModelState
+                    );
                 }
                 var result = await _authService.LoginAsync(loginDto.Email, loginDto.Password);
                 if (!result.AuthResponse.IsSuccess)
                 {
-                    return ErrorResponse(result.AuthResponse.Message, StatusCodes.Status400BadRequest);
+                    return Error
+                    (
+                        result.AuthResponse.Message, 
+                        StatusCodes.Status400BadRequest
+                    );
                 }
 
-                return SuccessResponse(result, "Welcome back! You're now logged in.", StatusCodes.Status200OK);
+                var flattenedResponse = new
+                {
+                    token = result.AuthResponse.Token,
+                    refreshToken = result.AuthResponse.RefreshToken,
+                    userId = result.AuthResponse.UserId,
+                    role = result.AuthResponse.Role
+                };
+
+                return Success(flattenedResponse, "Login successful!");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Something went wrong. Please try again.");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
 
@@ -74,14 +129,25 @@ namespace AD_Coursework.Controllers
                 var result = await _authService.RefreshTokenAsync(refreshTokenRequest.Token, refreshTokenRequest.RefreshToken);
                 if (!result.IsSuccess)
                 {
-                    return ErrorResponse(result.Message, StatusCodes.Status400BadRequest);
+                    return Error
+                    (
+                        result.Message, 
+                        StatusCodes.Status400BadRequest
+                    );
                 }
 
-                return SuccessResponse(result);
+                return Success(
+                    result,
+                    "Token refreshed successfully."
+                );
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Token refresh failed");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
 
@@ -93,13 +159,20 @@ namespace AD_Coursework.Controllers
             {
                 var userId = User.GetUserId();
                 await _authService.RevokeTokenAsync(userId);
-                return SuccessResponse(null, "Token revoked successfully");
+                return Success<object>
+                (
+                    null,
+                    "Token revoked successfully"
+                );
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Token revocation failed");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
-
     }
 }

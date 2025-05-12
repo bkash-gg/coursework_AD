@@ -137,8 +137,7 @@ namespace AD_Coursework.Services
                     Role = role,                 
                     IsSuccess = true,
                     Message = "Login successful."
-                },
-                User = null!
+                }
             };
         }
 
@@ -293,7 +292,7 @@ namespace AD_Coursework.Services
                 return new AuthResponseDto
                 {
                     IsSuccess = true,
-                    Message = "Profile updated successfully",
+                    Message = "Profile updated successfully!",
                     UserId = user.Id.ToString(),
                     Role = role
                 };

@@ -11,6 +11,5 @@ namespace AD_Coursework.Interfaces.Services
         Task<AuthResponseDto> UpdateProfileAsync(Guid userId, UserProfileUpdateDto profileUpdateDto);
         Task<AuthResponseDto> RefreshTokenAsync(string token, string refreshToken);
         Task RevokeTokenAsync(Guid token);
-
     }
 }

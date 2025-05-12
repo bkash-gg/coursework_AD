@@ -26,22 +26,40 @@ namespace AD_Coursework.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return ErrorResponse("Invalid data. Please check your details.", StatusCodes.Status400BadRequest, ModelState);
+                    return Error
+                    (
+                        "Invalid data. Please check your details.",
+                        StatusCodes.Status400BadRequest,
+                        ModelState
+                    );
                 }
-                _logger.LogInformation($"User claims: {string.Join(", ", User.Claims.Select(c => $"{c.Type}:{c.Value}"))}");
+
                 var userId = User.GetUserId();
                 var result = await _authService.ChangePasswordAsync(userId, passwordChangeDto);
 
                 if (!result.IsSuccess)
                 {
-                    return ErrorResponse(result.Message ?? "Password change failed.", StatusCodes.Status400BadRequest);
+                    return Error
+                    (
+                        result.Message ?? "Password change failed. Please try again.",
+                        StatusCodes.Status400BadRequest
+                    );
                 }
 
-                return SuccessResponse(result, "Password changed successfully!", StatusCodes.Status200OK);
+                return Success<Object>
+                (
+                    null,
+                    "Password changed successfully!",
+                    StatusCodes.Status200OK
+                );
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Something went wrong. Please try again.");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
 
@@ -53,7 +71,12 @@ namespace AD_Coursework.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return ErrorResponse("Invalid data. Please check your details.", StatusCodes.Status400BadRequest, ModelState);
+                    return Error
+                    (
+                        "Invalid data. Please check your details.",
+                        StatusCodes.Status400BadRequest,
+                        ModelState
+                    );
                 }
 
                 var userId = User.GetUserId();
@@ -61,14 +84,28 @@ namespace AD_Coursework.Controllers
 
                 if (!result.IsSuccess)
                 {
-                    return ErrorResponse(result.Message ?? "Profile update failed.", StatusCodes.Status400BadRequest);
+                    return Error
+                    (
+                        result.Message ?? "Profile update failed. Please try again.",
+                        StatusCodes.Status400BadRequest
+                    );
                 }
 
-                return SuccessResponse(result, "Profile updated successfully!", StatusCodes.Status200OK);
+                var flattenedResponse = new
+                {
+                    userId = result.UserId,
+                    role = result.Role
+                };
+
+                return Success(flattenedResponse, "Profile updated successfully!");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Something went wrong. Please try again.");
+                return HandleException
+                (
+                    ex,
+                    "Something went wrong. Please try again."
+                );
             }
         }
     }
