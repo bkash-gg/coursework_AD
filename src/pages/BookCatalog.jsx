@@ -3,6 +3,7 @@ import FilterPanel from '../components/FilterPanel';
 import CategoryTabs from '../components/CategoryTabs';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
+import { useCart } from '../context/CartContext';
 const mockBooks = new Array(20).fill(0).map((_, i) => ({
   id: i + 1,
   title: `Book ${i + 1}`,
@@ -41,6 +42,7 @@ const BookCatalog = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const booksPerPage = 12;
+  const { addToCart } = useCart();
 
   const filteredBooks = mockBooks
     .filter(CATEGORIES[activeCategory])
@@ -143,6 +145,7 @@ const BookCatalog = () => {
                         : 'bg-gray-400 cursor-not-allowed'
                     }`}
                     disabled={!book.inStock}
+                    onClick={() => book.inStock && addToCart(book)}
                   >
                     <FaShoppingCart /> Add
                   </button>

@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import Cart from './pages/Cart';
+import { CartProvider } from './context/CartContext';
 
 // Admin Pages
 import AdminLayout from './pages/Admin/AdminLayout';
@@ -16,25 +18,28 @@ import Announcements from './pages/Admin/Announcements';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/BookCatalog" element={<BookCatalog />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
+    <CartProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/BookCatalog" element={<BookCatalog />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/cart" element={<Cart />} />
 
-        {/* Admin Routes without Protection */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="books" element={<Books />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="announcements" element={<Announcements />} />
-        </Route>
-      </Routes>
-    </Router>
+          {/* Admin Routes without Protection */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="books" element={<Books />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="announcements" element={<Announcements />} />
+          </Route>
+        </Routes>
+      </Router>
+    </CartProvider>
   );
 }
 

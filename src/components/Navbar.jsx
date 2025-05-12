@@ -1,7 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa"; // ← Import the icon
+import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
+
   return (
     <nav className="bg-white shadow-md w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -13,9 +18,8 @@ const Navbar = () => {
           <li><Link to="/shop" className="hover:text-red-600">Shop</Link></li>
           <li><Link to="/blog" className="hover:text-red-600">Blog</Link></li>
           <li><Link to="/pages" className="hover:text-red-600">Pages</Link></li>
-          <li><Link to="/admin/dashboard" className="hover:text-red-600 font-semibold">Admin</Link></li> {/* 🆕 */}
+          <li><Link to="/admin/dashboard" className="hover:text-red-600 font-semibold">Admin</Link></li>
         </ul>
-
 
         <div className="hidden md:flex items-center space-x-4">
           <input
@@ -35,7 +39,17 @@ const Navbar = () => {
           >
             Sign Up
           </Link>
-          
+
+          {/* 🛒 Cart Icon */}
+          <Link to="/Cart" className="text-red-600 hover:text-red-800 text-xl relative">
+            <FaShoppingCart />
+            {/* Cart count badge */}
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
     </nav>
