@@ -23,7 +23,7 @@ const Home = () => {
       >
         <div className="mx-auto text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            Featured Books of the <span className="text-black">February</span>
+            New Realeases & Bestsellers
           </h2>
           <Carousel
             showThumbs={false}
@@ -54,7 +54,7 @@ const Home = () => {
        <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-12 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
-            Featured Categories
+            Top Genere
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
             {[
@@ -122,51 +122,11 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Deals of the Week */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
-              Deals of the Week
-            </h2>
-            <div className="flex items-center bg-[#3B6CF7]/10 px-4 py-2 rounded-full">
-              <span className="text-[#3B6CF7] font-semibold">Ends in: 2d 14h 30m</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <div 
-                key={i} 
-                className="flex items-center bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="w-32 h-48 bg-gray-200 rounded-xl overflow-hidden">
-                  <img 
-                    src={`/deal-book${i+1}.jpg`} 
-                    className="w-full h-full object-cover transform transition-all duration-500 hover:scale-110"
-                  />
-                </div>
-                <div className="ml-6 flex-1">
-                  <p className="text-sm text-gray-500">Limited Offer</p>
-                  <h3 className="font-semibold text-xl text-gray-800 mt-2">Special Edition Book</h3>
-                  <div className="flex items-center mt-3">
-                    <span className="text-[#3B6CF7] font-bold text-xl">$9.99</span>
-                    <span className="ml-3 text-gray-400 line-through">$19.99</span>
-                  </div>
-                  <button className="mt-4 px-4 py-2 bg-[#3B6CF7] text-white rounded-full hover:bg-[#2A5CE4] transition-colors duration-300">
-                    Grab Deal →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Favorite Authors */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
-            Favorite Authors
+            Top Publishers
           </h2>
           <div className="flex overflow-x-auto pb-6 scrollbar-hide">
             {[...Array(5)].map((_, i) => (

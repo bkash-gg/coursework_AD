@@ -1,19 +1,24 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { MdMail, MdLock, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md"
-import Button from "../components/Button"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  MdMail,
+  MdLock,
+  MdOutlineVisibility,
+  MdOutlineVisibilityOff,
+} from "react-icons/md";
+import Button from "../components/Button";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev)
-  }
+    setShowPassword((prev) => !prev);
+  };
 
   return (
     <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 h-1200">
       {/* Left column - Enhanced background */}
-      <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
+      <div className="hidden min-h-[96.5vh] md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white animate-float"></div>
@@ -37,13 +42,15 @@ const Login = () => {
       </div>
 
       {/* Right column - Enhanced form */}
-      <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
+      <div className="flex flex-grow min-h-[96.5vh] bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
               Log In To Your Account
             </h1>
-            <p className="text-gray-500 mt-1">Please enter your credentials to continue</p>
+            <p className="text-gray-500 mt-1">
+              Please enter your credentials to continue
+            </p>
           </div>
 
           {/* Enhanced form */}
@@ -55,7 +62,7 @@ const Login = () => {
                 className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
               />
-              <label 
+              <label
                 htmlFor="email"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -72,7 +79,7 @@ const Login = () => {
                 className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
               />
-              <label 
+              <label
                 htmlFor="password"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -91,7 +98,6 @@ const Login = () => {
                 )}
               </button>
             </div>
-
 
             <Button
               type="submit"
@@ -116,7 +122,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
