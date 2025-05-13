@@ -11,8 +11,11 @@ const Books = () => {
 
   return (
     <div className="p-6">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Manage Books</h2>
+        <p className="text-gray-600 mb-4">Add, edit, and delete books from the catalog.</p>
+        
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Books</h2>
+        <p></p>
         {!showForm && (
           <button
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
