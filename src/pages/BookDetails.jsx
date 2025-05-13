@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useCart } from '../context/CartContext';
 
 const BookDetails = () => {
-  const { id } = useParams(); // Get the book ID from the URL
+  const { id } = useParams();
   const [book, setBook] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchBookDetails = async () => {
@@ -21,18 +23,13 @@ const BookDetails = () => {
       try {
         const response = await axios.get(`https://localhost:7098/api/books/${id}`);
         if (response.data.success) {
-          setBook(response.data.data); // Use response.data.data to access the book details
+          setBook(response.data.data);
         } else {
           setError(response.data.message || 'Failed to fetch book details');
         }
       } catch (error) {
         console.error('Error fetching book details:', error);
-        setError(error.message || 'Failed to connect to the server. Please check your connection and try again.');
-        
-        // If you're getting connection refused errors, you might want to check:
-        // 1. Is your backend server running?
-        // 2. Is the URL correct? (https://localhost:7098)
-        // 3. Are there any CORS issues? (you might need to configure CORS on your backend)
+        setError(error.message || 'Failed to connect to the server.');
       } finally {
         setLoading(false);
       }
@@ -52,44 +49,33 @@ const BookDetails = () => {
     setIsWishlisted(!isWishlisted);
   };
 
+  const handleAddToCart = () => {
+    if (book.stockQuantity <= 0) return;
+    
+    addToCart({
+      id: book.id,
+      title: book.title,
+      author: book.authorName,
+      price: book.price,
+      format: book.format || 'Paperback',
+      img: book.coverImageUrl,
+      quantity: quantity
+    });
+    
+    // You can replace this with a toast notification if you prefer
+    alert(`${quantity} ${quantity > 1 ? 'copies' : 'copy'} of "${book.title}" added to cart!`);
+  };
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading book details...</p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-md text-center">
-          <div className="text-red-500 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Error Loading Book</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">
-            If this persists, please check your internet connection or try again later.
-          </p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50">Error: {error}</div>;
   }
 
   if (!book) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">No book data found.</p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50">No book found</div>;
   }
 
   return (
@@ -104,25 +90,17 @@ const BookDetails = () => {
                   src={`https://localhost:7098${book.coverImageUrl}`} 
                   alt={book.title} 
                   className="w-full h-auto rounded-lg shadow-xl transform hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIxIDVIM2ExIDEgMCAwMC0xIDF2MTJhMSAxIDAgMDAxIDFoMThhMSAxIDAgMDAxLTFWNmExIDEgMCAwMC0xLTF6bS0xIDJ2Mkg0VjdoMTZ6bTAgNHY4SDR2LThoMTZ6IiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+';
+                  }}
                 />
                 <div className="absolute -top-3 -right-3">
                   <button 
                     onClick={toggleWishlist}
                     className={`p-3 rounded-full shadow-md ${isWishlisted ? 'bg-red-100 text-red-500' : 'bg-white text-gray-400'} hover:shadow-lg transition-all`}
                   >
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-6 w-6" 
-                      fill={isWishlisted ? 'currentColor' : 'none'} 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isWishlisted ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </button>
                 </div>
@@ -145,9 +123,6 @@ const BookDetails = () => {
                 <span className="text-3xl font-bold text-gray-900">
                   {book.price ? `$${book.price.toFixed(2)}` : 'Price not available'}
                 </span>
-                {book.stockQuantity > 0 && book.price && (
-                  <span className="ml-2 text-sm text-green-600"></span>
-                )}
               </div>
 
               <p className="text-gray-700 leading-relaxed mb-6">{book.description}</p>
@@ -161,25 +136,16 @@ const BookDetails = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500">Published Date</h3>
                   <p className="mt-1 text-sm font-medium text-gray-900">
-                    {new Date(book.publicationDate).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {new Date(book.publicationDate).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500">Genre</h3>
                   <p className="mt-1 text-sm font-medium text-gray-900">{book.genre}</p>
                 </div>
-                
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500">Language</h3>
                   <p className="mt-1 text-sm font-medium text-gray-900">{book.language}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-500">ISBN</h3>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{book.isbn}</p>
                 </div>
               </div>
 
@@ -191,9 +157,7 @@ const BookDetails = () => {
                     className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg"
                     disabled={quantity <= 1}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
+                    -
                   </button>
                   <span className="px-4 py-1 text-gray-900 font-medium">{quantity}</span>
                   <button 
@@ -201,9 +165,7 @@ const BookDetails = () => {
                     className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
                     disabled={quantity >= 10}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
+                    +
                   </button>
                 </div>
 
@@ -212,6 +174,7 @@ const BookDetails = () => {
                     'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg' : 
                     'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
                   disabled={book.stockQuantity <= 0}
+                  onClick={handleAddToCart}
                 >
                   {book.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
                 </button>

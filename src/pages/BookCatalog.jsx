@@ -3,7 +3,7 @@ import FilterPanel from '../components/FilterPanel';
 import CategoryTabs from '../components/CategoryTabs';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/CartContext'; // Uncommented and using the cart context
 import axios from 'axios';
 
 const CATEGORY_ENDPOINTS = {
@@ -26,6 +26,7 @@ const BookCatalog = () => {
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const booksPerPage = 12;
+  const { addToCart } = useCart(); // Using the cart context
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -63,7 +64,7 @@ const BookCatalog = () => {
       }
 
       await axios.post(
-        'https://localhost:7098/api/whitelist',
+        'https://localhost:7098/api/wishlist', // Fixed endpoint (changed from whitelist to wishlist)
         { bookId: book.id },
         {
           headers: {
@@ -79,29 +80,19 @@ const BookCatalog = () => {
     }
   };
 
-  const addToCart = async (book) => {
+  const handleAddToCart = (book) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showNotification('You must be logged in to add to cart.', 'error');
-        return;
-      }
-
-      // Updated endpoint - adjust according to your actual API
-      await axios.post(
-        'https://localhost:7098/api/cart/add',
-        {
-          bookId: book.id,
-          quantity: 1,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      // Using the cart context's addToCart function
+      addToCart({
+        id: book.id,
+        title: book.title,
+        author: book.authorName,
+        price: book.price,
+        format: book.format || 'Paperback',
+        img: book.coverImageUrl,
+        quantity: 1
+      });
+      
       showNotification(`${book.title} added to your cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -212,6 +203,9 @@ const BookCatalog = () => {
                           src={`https://localhost:7098${book.coverImageUrl}`}
                           alt={book.title}
                           className="w-full h-48 object-contain mb-3"
+                          onError={(e) => {
+                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIxIDVIM2ExIDEgMCAwMC0xIDF2MTJhMSAxIDAgMDAxIDFoMThhMSAxIDAgMDAxLTFWNmExIDEgMCAwMC0xLTF6bS0xIDJ2Mkg0VjdoMTZ6bTAgNHY4SDR2LThoMTZ6IiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+';
+                          }}
                         />
                         <h3 className="font-semibold text-lg text-gray-800 truncate">{book.title}</h3>
                         <p className="text-sm text-gray-500 mb-1">by {book.authorName}</p>
@@ -242,7 +236,7 @@ const BookCatalog = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (book.isAvailable) {
-                              addToCart(book);
+                              handleAddToCart(book);
                             }
                           }}
                         >
