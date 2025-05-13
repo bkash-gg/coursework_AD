@@ -20,5 +20,7 @@ namespace AD_Coursework.DTOs.Announcement
 
         [Required(ErrorMessage = "Announcement Type is required.")]
         public string Type { get; set; } = string.Empty;
+
+        public bool IsActive { get; set; }
     }
 }

@@ -239,6 +239,20 @@ namespace AD_Coursework.Controllers
             }
         }
 
+        [HttpGet("deals")]
+        public async Task<IActionResult> GetBooksWithDiscounts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (books, totalCount) = await _bookService.GetBooksWithDiscountsAsync(page, pageSize);
+                return Paginated(books, totalCount, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "Failed to retrieve books with discounts");
+            }
+        }
+
         [HttpGet("filter")]
         public async Task<IActionResult> FilterBooks(
             [FromQuery] string? searchTerm,

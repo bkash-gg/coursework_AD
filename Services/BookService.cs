@@ -242,6 +242,40 @@ namespace AD_Coursework.Services
             return await _bookRepository.DeleteBookAsync(id);
         }
 
+        public async Task<(IEnumerable<BookDto> Books, int TotalCount)> GetBooksWithDiscountsAsync(int page, int pageSize)
+        {
+            var books = await _bookRepository.GetBooksWithDiscountsAsync(page, pageSize);
+            var totalCount = await _bookRepository.GetFilteredBooksCountAsync(
+                null, null, null, null, null, null, null, null, null, null, true);
+
+            var bookDtos = books.Select(book => new BookDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                ISBN = book.ISBN,
+                PublicationDate = book.PublicationDate,
+                Language = book.Language,
+                Description = book.Description,
+                Price = book.Price,
+                StockQuantity = book.StockQuantity,
+                IsAvailable = book.IsAvailable,
+                Format = book.Format,
+                CoverImageUrl = book.CoverImageUrl,
+                IsAwardWinner = book.IsAwardWinner,
+                IsComingSoon = book.IsComingSoon,
+                PublisherName = book.Publisher?.Name ?? string.Empty,
+                AuthorName = book.Author?.Name ?? string.Empty,
+                Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                .DiscountPercentage ?? 0f
+
+            });
+
+            return (bookDtos, totalCount);
+        }
+
         public async Task<(IEnumerable<BookDto> Books, int TotalCount)> GetNewReleasesAsync(int page, int pageSize)
         {
             var books = await _bookRepository.GetNewReleasesAsync(page, pageSize);

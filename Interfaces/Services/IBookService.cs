@@ -41,5 +41,7 @@ namespace AD_Coursework.Interfaces.Services
             bool ascending,
             int page,
             int pageSize);
+
+        Task<(IEnumerable<BookDto> Books, int TotalCount)> GetBooksWithDiscountsAsync(int page, int pageSize);
     }
 }

@@ -20,6 +20,7 @@ namespace AD_Coursework.DTOs.Book
         public string PublisherName { get; set; } = string.Empty;
         public string AuthorName { get; set; } = string.Empty;
         public List<string> Genres { get; set; } = new(); 
+        public float DiscountPercentage { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

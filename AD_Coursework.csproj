@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Hubs\**" />
-    <Content Remove="Hubs\**" />
-    <EmbeddedResource Remove="Hubs\**" />
-    <None Remove="Hubs\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Remove="C:\Users\N I T R O 5\.nuget\packages\bootstrap\5.3.5\contentFiles\any\any\wwwroot\css\bootstrap-grid.css" />
     <Content Remove="C:\Users\N I T R O 5\.nuget\packages\bootstrap\5.3.5\contentFiles\any\any\wwwroot\css\bootstrap-grid.css.map" />
     <Content Remove="C:\Users\N I T R O 5\.nuget\packages\bootstrap\5.3.5\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css" />

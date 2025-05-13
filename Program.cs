@@ -1,9 +1,11 @@
 using AD_Coursework.Data;
+using AD_Coursework.Hubs;
 using AD_Coursework.Interfaces.Repositories;
 using AD_Coursework.Interfaces.Services;
 using AD_Coursework.Models;
 using AD_Coursework.Repositories;
 using AD_Coursework.Services;
+using AD_Coursework.Services.Utilities;
 using AD_Coursework.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
 
 // Configure Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
@@ -120,6 +123,15 @@ builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IWhitelistItemRepository, WhitelistItemRepository>();
+builder.Services.AddScoped<IWhitelistItemService, WhitelistItemService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 
 var app = builder.Build();
 
@@ -130,7 +142,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("AllowReactApp");
 }
-
+app.MapHub<AnnouncementHub>("/announcementHub");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

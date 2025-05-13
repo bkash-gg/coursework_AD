@@ -65,5 +65,6 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<IEnumerable<BookGenre>> GetBookGenresByBookIdAsync(Guid bookId);
         Task<bool> BookGenreExistsAsync(Guid bookId, Guid genreId);
         Task UpdateBookGenresAsync(Guid bookId, List<Guid> genreIds);
+        Task<IEnumerable<Book>> GetBooksWithDiscountsAsync(int page, int pageSize);
     }
 }

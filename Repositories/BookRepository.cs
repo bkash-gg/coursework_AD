@@ -479,5 +479,21 @@ namespace AD_Coursework.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Book>> GetBooksWithDiscountsAsync(int page, int pageSize)
+        {
+            var now = DateTime.UtcNow;
+            return await _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.BookGenres)
+                    .ThenInclude(bg => bg.Genre)
+                .Include(b => b.Discounts)
+                .Where(b => b.Discounts.Any(d => d.StartDate <= now && d.EndDate >= now))
+                .OrderBy(b => b.Title)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
     }
 }

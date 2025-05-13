@@ -19,5 +19,6 @@ namespace AD_Coursework.Models
         public required virtual Book Book { get; set; }
 
         public DateTime AddedOn { get; set; } = DateTime.UtcNow;
+
     }
 }
