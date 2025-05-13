@@ -50,7 +50,7 @@ namespace AD_Coursework.Services
             }
 
             var passwordValidator = new PasswordValidator<User>();
-            var passwordValidation = await passwordValidator.ValidateAsync(_userManager, null, userRegistrationDto.Password);
+            var passwordValidation = await passwordValidator.ValidateAsync(_userManager, null!, userRegistrationDto.Password);
             if (!passwordValidation.Succeeded)
             {
                 return new AuthResponseDto

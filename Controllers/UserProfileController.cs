@@ -18,6 +18,7 @@ namespace AD_Coursework.Controllers
             _authService = authService;
         }
 
+        // Changes the password for the logged-in user
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] UserPasswordChangeDto passwordChangeDto)
@@ -26,43 +27,28 @@ namespace AD_Coursework.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return Error
-                    (
-                        "Invalid data. Please check your details.",
-                        StatusCodes.Status400BadRequest,
-                        ModelState
-                    );
+                    return Error("Please correct the highlighted errors.", StatusCodes.Status400BadRequest, ModelState);
                 }
 
                 var userId = User.GetUserId();
+
                 var result = await _authService.ChangePasswordAsync(userId, passwordChangeDto);
 
                 if (!result.IsSuccess)
                 {
-                    return Error
-                    (
-                        result.Message ?? "Password change failed. Please try again.",
-                        StatusCodes.Status400BadRequest
-                    );
+                    return Error(result.Message ?? "Couldn’t update your password. Try again.", StatusCodes.Status400BadRequest);
                 }
 
-                return Success<Object>
-                (
-                    null,
-                    "Password changed successfully!",
-                    StatusCodes.Status200OK
-                );
+                return Success<object>(null, "Your password has been updated successfully!.", StatusCodes.Status200OK);
             }
             catch (Exception ex)
             {
-                return HandleException
-                (
-                    ex,
-                    "Something went wrong. Please try again."
-                );
+                _logger.LogError(ex, "Error occurred while changing password.");
+                return HandleException(ex, "We ran into a problem changing your password. Try again.");
             }
         }
 
+        // Updates the profile information of the logged-in user
         [Authorize]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfileUpdateDto profileUpdateDto)
@@ -71,24 +57,16 @@ namespace AD_Coursework.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return Error
-                    (
-                        "Invalid data. Please check your details.",
-                        StatusCodes.Status400BadRequest,
-                        ModelState
-                    );
+                    return Error("Please correct the highlighted errors.", StatusCodes.Status400BadRequest, ModelState);
                 }
 
                 var userId = User.GetUserId();
+
                 var result = await _authService.UpdateProfileAsync(userId, profileUpdateDto);
 
                 if (!result.IsSuccess)
                 {
-                    return Error
-                    (
-                        result.Message ?? "Profile update failed. Please try again.",
-                        StatusCodes.Status400BadRequest
-                    );
+                    return Error(result.Message ?? "Couldn’t update your profile. Try again.", StatusCodes.Status400BadRequest);
                 }
 
                 var flattenedResponse = new
@@ -97,15 +75,12 @@ namespace AD_Coursework.Controllers
                     role = result.Role
                 };
 
-                return Success(flattenedResponse, "Profile updated successfully!");
+                return Success(flattenedResponse, "Your profile has been updated successfully!");
             }
             catch (Exception ex)
             {
-                return HandleException
-                (
-                    ex,
-                    "Something went wrong. Please try again."
-                );
+                _logger.LogError(ex, "Error occurred while updating profile.");
+                return HandleException(ex, "We couldn’t save your profile changes. Please try again.");
             }
         }
     }
