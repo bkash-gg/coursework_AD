@@ -26,10 +26,6 @@ const BookCatalog = () => {
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const booksPerPage = 12;
-  const { addToCart } = useCart();
-
-  // Get current user ID (you'll need to implement this based on your auth system)
-  const currentUserId = 1; // Replace with actual user ID from your auth context
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -60,24 +56,56 @@ const BookCatalog = () => {
 
   const addToWishlist = async (book) => {
     try {
-      const response = await axios.post('/api/whitelist', {
-        userId: currentUserId,
-        bookId: book.id,
-        title: book.title,
-        author: book.authorName,
-        price: book.price,
-        imageUrl: book.coverImageUrl,
-        rating: book.rating || 0
-      });
-
-      if (response.status === 201) {
-        showNotification('Book added to wishlist!');
-      } else {
-        showNotification('Failed to add to wishlist', 'error');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showNotification('You must be logged in to save books.', 'error');
+        return;
       }
+
+      await axios.post(
+        'https://localhost:7098/api/whitelist',
+        { bookId: book.id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      showNotification(`${book.title} saved to your wishlist!`);
     } catch (error) {
       console.error('Error adding to wishlist:', error);
-      showNotification('Failed to add to wishlist', 'error');
+      showNotification('Failed to add to wishlist.', 'error');
+    }
+  };
+
+  const addToCart = async (book) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showNotification('You must be logged in to add to cart.', 'error');
+        return;
+      }
+
+      // Updated endpoint - adjust according to your actual API
+      await axios.post(
+        'https://localhost:7098/api/cart/add',
+        {
+          bookId: book.id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      showNotification(`${book.title} added to your cart!`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showNotification('Failed to add to cart. Please try again.', 'error');
     }
   };
 
@@ -177,7 +205,7 @@ const BookCatalog = () => {
                       <div 
                         className="cursor-pointer"
                         onClick={() => {
-                          window.location.href = `http://localhost:5173/bookdetails/${book.id}`;
+                          window.location.href = `/bookdetails/${book.id}`;
                         }}
                       >
                         <img
