@@ -9,7 +9,8 @@ const Wishlist = () => {
 
   // Fetch wishlist items
   useEffect(() => {
-    axios.get('https://localhost:7098/api/wishlist')
+
+    axios.get('https://localhost:7098/api/whitelist')
       .then((response) => {
         setWishlistItems(response.data);
       })
@@ -19,7 +20,7 @@ const Wishlist = () => {
   }, []);
 
   const removeFromWishlist = (id) => {
-    axios.delete(`https://localhost:7098/api/wishlist/${id}`)
+    axios.delete(`https://localhost:7098/api/whitelist/${id}`)
       .then(() => {
         setWishlistItems((prevItems) => prevItems.filter(item => item.id !== id));
         setShowNotification(true);

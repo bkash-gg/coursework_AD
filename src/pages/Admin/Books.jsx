@@ -446,7 +446,7 @@ const Books = () => {
           <table className="w-full table-auto">
             <thead className="bg-gray-100 text-gray-700 text-left">
               <tr>
-                <th className="px-6 text-center py-4 font-semibold">Title</th>
+                <th className="px-6 text-left py-4 font-semibold">Title</th>
                 <th className="px-6 text-center py-4 font-semibold">Author</th>
                 <th className="px-6 text-center py-4 font-semibold">Price</th>
                 <th className="px-6 text-center py-4 font-semibold">Stock</th>
@@ -464,7 +464,7 @@ const Books = () => {
               ) : (
                 books.map((book) => (
                   <tr key={book.id} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="px-6 py-4 font-medium">{book.title}</td>
+                    <td className="px-6 text-left py-4 font-medium">{book.title}</td>
                     <td className="px-6 py-4 text-gray-600">{book.authorName || book.author || "Unknown"}</td>
                     <td className="px-6 py-4 text-gray-600">${book.price?.toFixed(2)}</td>
                     <td className="px-6 py-4 text-gray-600">{book.stockQuantity || book.stock || 0}</td>
