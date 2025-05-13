@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import FilterPanel from '../components/FilterPanel';
 import CategoryTabs from '../components/CategoryTabs';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
-import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext'; // Uncommented and using the cart context
 import axios from 'axios';
 
@@ -124,7 +123,6 @@ const BookCatalog = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <Navbar />
         <div className="flex justify-center items-center h-64">
           <p>Loading books...</p>
         </div>
@@ -135,7 +133,6 @@ const BookCatalog = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <Navbar />
         <div className="flex justify-center items-center h-64">
           <p className="text-red-500">{error}</p>
         </div>
