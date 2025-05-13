@@ -3,9 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { Book, Tag, UserCheck, ShoppingCart } from "lucide-react";
 import axios from "axios";
 import {
-  PieChart, Pie, Cell, Tooltip, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
 } from "recharts";
+import { div } from "framer-motion/client";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444"];
 
@@ -59,26 +69,70 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-10">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Admin Dashboard</h2>
+      <p className="text-gray-600 mb-4">
+        Overview of key metrics and statistics
+      </p>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-700">Welcome, Admin!</h3>
+      </div>
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card icon={Book} title="Total Books" value={stats.totalBooks} color="text-blue-500" />
-        <Card icon={Tag} title="Books On Sale" value={stats.booksOnSale} color="text-green-500" />
-        <Card icon={UserCheck} title="Total Members" value={stats.totalMembers} color="text-indigo-500" />
-        <Card icon={ShoppingCart} title="Total Orders" value={stats.totalOrders} color="text-red-500" />
+        <Card
+          icon={Book}
+          title="Total Books"
+          value={stats.totalBooks}
+          color="text-blue-500"
+        />
+        <Card
+          icon={Tag}
+          title="Books On Sale"
+          value={stats.booksOnSale}
+          color="text-green-500"
+        />
+        <Card
+          icon={UserCheck}
+          title="Total Members"
+          value={stats.totalMembers}
+          color="text-indigo-500"
+        />
+        <Card
+          icon={ShoppingCart}
+          title="Total Orders"
+          value={stats.totalOrders}
+          color="text-red-500"
+        />
       </div>
 
       {/* Navigation Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button onClick={() => navigate("/admin/books")} className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow">Manage Books</button>
-        <button onClick={() => navigate("/admin/orders")} className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg shadow">Manage Orders</button>
-        <button onClick={() => navigate("/admin/announcements")} className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg shadow">Announcements</button>
+        <button
+          onClick={() => navigate("/admin/books")}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow"
+        >
+          Manage Books
+        </button>
+        <button
+          onClick={() => navigate("/admin/orders")}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg shadow"
+        >
+          Manage Orders
+        </button>
+        <button
+          onClick={() => navigate("/admin/announcements")}
+          className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg shadow"
+        >
+          Announcements
+        </button>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Pie Chart */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Book Categories</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">
+            Book Categories
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -91,7 +145,10 @@ const AdminDashboard = () => {
                 label
               >
                 {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -102,7 +159,9 @@ const AdminDashboard = () => {
 
         {/* Bar Chart */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Monthly Orders</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">
+            Monthly Orders
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyOrders}>
               <CartesianGrid strokeDasharray="3 3" />

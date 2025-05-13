@@ -17,7 +17,6 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="max-w-5xl mx-auto py-12 px-4">
           <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Cart</h1>
           <div className="bg-white rounded-lg shadow-md p-8 text-center">

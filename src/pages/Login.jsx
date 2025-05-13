@@ -51,7 +51,7 @@ const Login = () => {
   return (
     <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
       {/* Left column - Enhanced background */}
-      <div className="hidden min-h-[96.5vh] md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
+      <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white animate-float"></div>
@@ -75,7 +75,7 @@ const Login = () => {
       </div>
 
       {/* Right column - Enhanced form */}
-      <div className="flex flex-grow min-h-[96.5vh] bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
+      <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
