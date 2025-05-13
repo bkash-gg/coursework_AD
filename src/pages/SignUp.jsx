@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   MdMail,
   MdLock,
@@ -8,14 +8,15 @@ import {
   MdOutlineVisibilityOff,
 } from "react-icons/md";
 import Button from "../components/Button";
-import authService from "../services/authService";
+// import authService from "../services/authService";
+import axios from "axios";
 
 const SignUp = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -28,36 +29,24 @@ const SignUp = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
     setError(""); // Clear error when user types
   };
+  const payload = {
+    email: formData.email,
+    username: formData.username,
+    password: formData.password,
+    confirmPassword: formData.confirmPassword,
+    };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await authService.register({
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-      });
-
-      // If registration is successful, redirect to login
-      navigate("/login", {
-        state: { message: "Registration successful! Please login." },
-      });
-    } catch (error) {
-      setError(error.message || "Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault()
+  try {
+    const response = await axios.post("http://localhost:7098/api/auth/register", payload)
+    console.log(response.data)
+    alert(response.data.message)
+  } catch (error) {
+    console.error(error)
+    alert("Registration failed")
+  }
+}
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -216,10 +205,10 @@ const SignUp = () => {
 
             <Button
               type="submit"
-              disabled={loading}
+             
               className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              
             </Button>
           </form>
 
