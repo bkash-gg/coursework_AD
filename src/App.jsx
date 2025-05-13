@@ -44,7 +44,7 @@ function AppRoutes() {
         <Route path="/BookCatalog" element={<BookCatalog />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/bookdetails" element={<BookDetails />} />
+        <Route path="/bookdetails/:id" element={<BookDetails />} />
 
         {/* Authentication Routes */}
         <Route path="/login" element={<Login />} />
