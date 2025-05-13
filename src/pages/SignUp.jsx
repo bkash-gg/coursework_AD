@@ -29,24 +29,18 @@ const SignUp = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
     setError(""); // Clear error when user types
   };
-  // const payload = {
-  //   email: formData.email,
-  //   username: formData.username,
-  //   password: formData.password,
-  //   confirmPassword: formData.confirmPassword,
-  //   };
+  const payload = {
+    email: formData.email,
+    username: formData.username,
+    password: formData.password,
+    confirmPassword: formData.confirmPassword,
+    };
 
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     const response = await axios.post(
-      "https://localhost:7098/api/auth/register",
-      {
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
-      },
+      "https://localhost:7098/api/auth/register", payload,
       {
         headers: {
           'Content-Type': 'application/json'
@@ -223,7 +217,7 @@ const SignUp = () => {
               type="submit"
              
               className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            >Sign Up
               
             </Button>
           </form>

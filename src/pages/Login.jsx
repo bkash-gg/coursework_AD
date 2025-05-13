@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MdMail,
   MdLock,
@@ -7,16 +7,49 @@ import {
   MdOutlineVisibilityOff,
 } from "react-icons/md";
 import Button from "../components/Button";
+import axios from "axios";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    setError(""); // Clear error when user types
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const response = await axios.post("https://localhost:7098/api/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+      navigate("/Home");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
+
   return (
-    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 h-1200">
+    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
       {/* Left column - Enhanced background */}
       <div className="hidden min-h-[96.5vh] md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
@@ -53,14 +86,24 @@ const Login = () => {
             </p>
           </div>
 
+          {/* Error message display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg animate-fade-in">
+              {error}
+            </div>
+          )}
+
           {/* Enhanced form */}
-          <form className="space-y-6 animate-fade-in-up">
+          <form className="space-y-6 animate-fade-in-up" onSubmit={handleSubmit}>
             <div className="group relative">
               <input
                 type="email"
                 id="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                required
               />
               <label
                 htmlFor="email"
@@ -76,8 +119,11 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                required
               />
               <label
                 htmlFor="password"
