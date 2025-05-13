@@ -29,24 +29,40 @@ const SignUp = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
     setError(""); // Clear error when user types
   };
-  const payload = {
-    email: formData.email,
-    username: formData.username,
-    password: formData.password,
-    confirmPassword: formData.confirmPassword,
-    };
+  // const payload = {
+  //   email: formData.email,
+  //   username: formData.username,
+  //   password: formData.password,
+  //   confirmPassword: formData.confirmPassword,
+  //   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
+  e.preventDefault();
   try {
-    const response = await axios.post("http://localhost:7098/api/auth/register", payload)
-    console.log(response.data)
-    alert(response.data.message)
+    const response = await axios.post(
+      "https://localhost:7098/api/auth/register",
+      {
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log(response.data);
   } catch (error) {
-    console.error(error)
-    alert("Registration failed")
+    console.error("Full error:", error);
+    if (error.response) {
+      setError(error.response.data.message);
+    } else {
+      setError("Cannot connect to server. Is the backend running?");
+    }
   }
-}
+};
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
