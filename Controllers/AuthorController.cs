@@ -11,12 +11,14 @@ namespace AD_Coursework.Controllers
     {
         private readonly IAuthorService _authorService;
 
+        // Constructor that initializes the author service and logger
         public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger)
             : base(logger)
         {
             _authorService = authorService;
         }
 
+        // Retrieves all authors from the database
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -25,17 +27,19 @@ namespace AD_Coursework.Controllers
                 var authors = await _authorService.GetAllAsync();
                 if (!authors.Any())
                 {
-                    return Success(authors, "No authors found.");
+                    return Success(authors, "No authors available.");
                 }
 
-                return Success(authors, "Authors retrieved successfully.");
+                return Success(authors, "Authors fetched successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve authors.");
+                _logger.LogError(ex, "Error occurred while fetching authors.");
+                return HandleException(ex, "Unable to fetch authors. Please try again later.");
             }
         }
 
+        // Retrieves a specific author by their unique identifier
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -47,14 +51,16 @@ namespace AD_Coursework.Controllers
                     return Error("Author not found.", StatusCodes.Status404NotFound);
                 }
 
-                return Success(author, "Author retrieved successfully.");
+                return Success(author, "Author fetched successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve author.");
+                _logger.LogError(ex, "Error occurred while fetching author.");
+                return HandleException(ex, "Unable to fetch author. Please try again later.");
             }
         }
 
+        // Creates a new author record (admin only)
         [HttpPost("add")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] AuthorCreateDto authorCreateDto)
@@ -63,13 +69,13 @@ namespace AD_Coursework.Controllers
             {
                 if (authorCreateDto == null)
                 {
-                    return Error("Request body cannot be empty.", StatusCodes.Status400BadRequest);
+                    return Error("Please provide author details.", StatusCodes.Status400BadRequest);
                 }
 
                 if (!ModelState.IsValid)
                 {
                     return Error(
-                        "Invalid data. Please check your details.",
+                        "Invalid details. Please check your inputs.",
                         StatusCodes.Status400BadRequest,
                         ModelState
                     );
@@ -78,20 +84,23 @@ namespace AD_Coursework.Controllers
                 var author = await _authorService.CreateAsync(authorCreateDto);
                 return Success(
                     author,
-                    "Author created successfully!",
+                    "Author added successfully.",
                     StatusCodes.Status201Created
                 );
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error occurred while creating author.");
                 return Error(ex.Message, StatusCodes.Status400BadRequest);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to create author.");
+                _logger.LogError(ex, "Error occurred while creating author.");
+                return HandleException(ex, "Unable to create author. Please try again.");
             }
         }
 
+        // Updates an existing author's information (admin only)
         [HttpPut("{id}/update")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] AuthorUpdateDto authorUpdateDto)
@@ -100,7 +109,7 @@ namespace AD_Coursework.Controllers
             {
                 if (authorUpdateDto == null)
                 {
-                    return Error("Request body cannot be empty.", StatusCodes.Status400BadRequest);
+                    return Error("Please provide updated author details.", StatusCodes.Status400BadRequest);
                 }
 
                 if (!ModelState.IsValid)
@@ -118,14 +127,16 @@ namespace AD_Coursework.Controllers
                     return Error("Author not found.", StatusCodes.Status404NotFound);
                 }
 
-                return Success(author, "Author updated successfully!");
+                return Success(author, "Author details updated successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to update author.");
+                _logger.LogError(ex, "Error occurred while updating author.");
+                return HandleException(ex, "Unable to update author. Please try again later.");
             }
         }
 
+        // Permanently removes an author from the system (admin only)
         [HttpDelete("{id}/delete")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
@@ -138,11 +149,12 @@ namespace AD_Coursework.Controllers
                     return Error("Author not found.", StatusCodes.Status404NotFound);
                 }
 
-                return Success<object>(null, "Author deleted successfully!");
+                return Success<object>(null, "Author deleted successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to delete author.");
+                _logger.LogError(ex, "Error occurred while deleting author.");
+                return HandleException(ex, "Unable to delete author. Please try again later.");
             }
         }
     }
