@@ -15,5 +15,6 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<bool> RemoveCartItemAsync(Guid cartId, Guid bookId);
         Task<bool> ClearCartAsync(Guid cartId);
         Task<IEnumerable<CartItem>> GetCartItemsAsync(Guid cartId);
+        public Task<Cart?> GetCartByIdAsync(Guid cartId);
     }
 }

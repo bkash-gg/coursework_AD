@@ -99,5 +99,11 @@ namespace AD_Coursework.Repositories
                 .Include(ci => ci.Book)
                 .ToListAsync();
         }
+
+        public async Task<Cart?> GetCartByIdAsync(Guid cartId)
+        {
+            return await _context.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
+        }
+
     }
 }

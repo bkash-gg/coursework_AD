@@ -117,17 +117,27 @@ namespace AD_Coursework.Services
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
             if (cart == null) return false;
 
-            return await _cartRepository.ClearCartAsync(cart.Id);
+            bool itemsCleared = await _cartRepository.ClearCartAsync(cart.Id);
+
+            if (itemsCleared)
+            {
+                cart.ItemCount = 0;
+                cart.Subtotal = 0;
+                await _cartRepository.UpdateCartAsync(cart);
+            }
+
+            return itemsCleared;
         }
 
         private async Task UpdateCartTotals(Guid cartId)
         {
-            var cart = await _cartRepository.GetCartByUserIdAsync(cartId);
+            var cart = await _cartRepository.GetCartByIdAsync(cartId);
             if (cart == null) return;
 
             var items = await _cartRepository.GetCartItemsAsync(cartId);
 
-            cart.ItemCount = items.Sum(i => i.Quantity);
+            cart.ItemCount = items.Count();
+
             cart.Subtotal = items.Sum(i => i.Quantity * i.UnitPrice);
 
             await _cartRepository.UpdateCartAsync(cart);
