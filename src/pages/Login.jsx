@@ -1,17 +1,58 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { MdMail, MdLock, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md"
-import Button from "../components/Button"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  MdMail,
+  MdLock,
+  MdOutlineVisibility,
+  MdOutlineVisibilityOff,
+} from "react-icons/md";
+import Button from "../components/Button";
+import axios from "axios";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
   const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev)
-  }
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    setError(""); // Clear error when user types
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const response = await axios.post("https://localhost:7098/api/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      const { token, refreshToken, userId, role } = response.data.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("role", role);
+      navigate("/Home");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
-    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 h-1200">
+    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
       {/* Left column - Enhanced background */}
       <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
@@ -43,19 +84,31 @@ const Login = () => {
             <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
               Log In To Your Account
             </h1>
-            <p className="text-gray-500 mt-1">Please enter your credentials to continue</p>
+            <p className="text-gray-500 mt-1">
+              Please enter your credentials to continue
+            </p>
           </div>
 
+          {/* Error message display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg animate-fade-in">
+              {error}
+            </div>
+          )}
+
           {/* Enhanced form */}
-          <form className="space-y-6 animate-fade-in-up">
+          <form className="space-y-6 animate-fade-in-up" onSubmit={handleSubmit}>
             <div className="group relative">
               <input
                 type="email"
                 id="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                required
               />
-              <label 
+              <label
                 htmlFor="email"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -69,10 +122,13 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
                 placeholder=" "
+                required
               />
-              <label 
+              <label
                 htmlFor="password"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -91,7 +147,6 @@ const Login = () => {
                 )}
               </button>
             </div>
-
 
             <Button
               type="submit"
@@ -116,7 +171,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

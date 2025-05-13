@@ -12,20 +12,20 @@ const Orders = () => {
       <table className="w-full table-auto bg-white rounded shadow">
         <thead className="bg-gray-100 text-gray-700 text-left">
           <tr>
-            <th className="p-4">Order ID</th>
-            <th className="p-4">Member</th>
-            <th className="p-4">Items</th>
-            <th className="p-4">Status</th>
-            <th className="p-4">Actions</th>
+            <th className="p-4 text-center">Order ID</th>
+            <th className="p-4 text-center">Member</th>
+            <th className="p-4 text-center">Items</th>
+            <th className="p-4 text-center">Status</th>
+            <th className="p-4 text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           {orders.map(order => (
             <tr key={order.id} className="border-t hover:bg-gray-50">
-              <td className="p-4">{order.id}</td>
-              <td className="p-4">{order.member}</td>
-              <td className="p-4">{order.items}</td>
-              <td className="p-4">
+              <td className="p-4 text-center">{order.id}</td>
+              <td className="p-4 text-center">{order.member}</td>
+              <td className="p-4 text-center">{order.items}</td>
+              <td className="p-4 text-center">
                 <span className={`text-sm font-medium ${order.status === "Completed" ? "text-green-600" : "text-yellow-600"}`}>
                   {order.status}
                 </span>

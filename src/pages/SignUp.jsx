@@ -1,70 +1,92 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { MdMail, MdLock, MdPerson, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md"
-import Button from "../components/Button"
-import authService from "../services/authService"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  MdMail,
+  MdLock,
+  MdPerson,
+  MdOutlineVisibility,
+  MdOutlineVisibilityOff,
+} from "react-icons/md";
+import Button from "../components/Button";
+// import authService from "../services/authService";
+import axios from "axios";
 
 const SignUp = () => {
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  // const navigate = useNavigate();
+  const [passwordValid, setPasswordValid] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
-  })
+  });
 
   const handleChange = (e) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
-    setError("") // Clear error when user types
-  }
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+
+    // Validate password and confirm password
+    if (id === "password" || id === "confirmPassword") {
+      const password = formData.password;
+      const confirmPassword = formData.confirmPassword;
+      setPasswordValid(password === confirmPassword);
+    }
+
+    // Validate password strength
+    if (id === "password") {
+      const passwordStrength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+      if (!passwordStrength.test(value)) {
+        setError("Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.");
+      } else {
+        setError("");
+      }
+    }
+  };
+  const payload = {
+    email: formData.email,
+    username: formData.username,
+    password: formData.password,
+    confirmPassword: formData.confirmPassword,
+    };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      setLoading(false)
-      return
-    }
-
-    try {
-      const response = await authService.register({
-        email: formData.email,
-        username: formData.username,
-        password: formData.password
-      })
-      
-      // If registration is successful, redirect to login
-      navigate("/login", { 
-        state: { message: "Registration successful! Please login." }
-      })
-    } catch (error) {
-      setError(error.message || "Registration failed. Please try again.")
-    } finally {
-      setLoading(false)
+  e.preventDefault();  
+  try {
+    const response = await axios.post(
+      "https://localhost:7098/api/auth/register", payload,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log(response.data);
+  } catch (error) {
+    console.error("Full error:", error);
+    if (error.response) {
+      setError(error.response.data.message);
+    } else {
+      setError("Cannot connect to server. Is the backend running?");
     }
   }
+};
 
   const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev)
-  }
+    setShowPassword((prev) => !prev);
+  };
 
   const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword((prev) => !prev)
-  }
+    setShowConfirmPassword((prev) => !prev);
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Left column - Enhanced background */}
-      <div className="hidden md:flex md:w-2/5 min-h-screen bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
+      <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white animate-float"></div>
@@ -75,30 +97,37 @@ const SignUp = () => {
         <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 shadow-xl relative z-10 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
           <MdPerson className="text-white h-20 w-20 opacity-90 animate-bounce-in" />
         </div>
-        <h2 className="text-4xl font-bold mb-4 relative z-10 animate-slide-in">Create Account</h2>
+        <h2 className="text-4xl font-bold mb-4 relative z-10 animate-slide-in">
+          Create Account
+        </h2>
         <p className="text-xl text-center max-w-md relative z-10 animate-slide-in-delayed">
           Join our community and start your journey
         </p>
       </div>
 
       {/* Right column - Enhanced form */}
-      <div className="flex-1 min-h-screen flex items-center justify-center bg-white/90 backdrop-blur-lg shadow-xl">
+      <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
               Sign Up for BookWorm
             </h1>
-            <p className="text-gray-500 mt-1">Create your account to get started</p>
+            <p className="text-gray-500 mt-1">
+              Create your account to get started
+            </p>
           </div>
 
           {/* Enhanced sign up form */}
-          <form className="space-y-6 animate-fade-in-up" onSubmit={handleSubmit}>
+          <form
+            className="space-y-6 animate-fade-in-up"
+            onSubmit={handleSubmit}
+          >
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                 {error}
               </div>
             )}
-            
+
             {/* Email Input */}
             <div className="group relative">
               <input
@@ -110,7 +139,7 @@ const SignUp = () => {
                 onChange={handleChange}
                 required
               />
-              <label 
+              <label
                 htmlFor="email"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -130,7 +159,7 @@ const SignUp = () => {
                 onChange={handleChange}
                 required
               />
-              <label 
+              <label
                 htmlFor="username"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -150,7 +179,7 @@ const SignUp = () => {
                 onChange={handleChange}
                 required
               />
-              <label 
+              <label
                 htmlFor="password"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -181,7 +210,7 @@ const SignUp = () => {
                 onChange={handleChange}
                 required
               />
-              <label 
+              <label
                 htmlFor="confirmPassword"
                 className="absolute left-12 -top-2.5 px-1 bg-white text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-[#3B6CF7]"
               >
@@ -203,10 +232,10 @@ const SignUp = () => {
 
             <Button
               type="submit"
-              disabled={loading}
+             
               className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Creating Account..." : "Create Account"}
+            >Sign Up
+              
             </Button>
           </form>
 
@@ -225,7 +254,7 @@ const SignUp = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SignUp
+export default SignUp;
