@@ -33,7 +33,7 @@ function App() {
           <Route path="/blog/:id" element={<BlogPost />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/bookdetails" element={<BookDetails />} />
+          <Route path="/bookdetails/:id" element={<BookDetails />} />
 
           {/* Admin Routes without Protection */}
           <Route path="/admin" element={<AdminLayout />}>
