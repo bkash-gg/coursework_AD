@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const AddBookForm = ({ onClose }) => {
   const [form, setForm] = useState({
@@ -26,10 +27,18 @@ const AddBookForm = ({ onClose }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitted book:", form);
-    onClose();
+
+    try {
+      // Send the POST request to your backend API
+      const response = await axios.post("https://localhost:7098/api/books/add", form); // Use your backend URL here
+      console.log("Book added:", response.data);
+      onClose();
+    } catch (error) {
+      console.error("Error adding book:", error);
+    }
   };
 
   return (
@@ -43,7 +52,7 @@ const AddBookForm = ({ onClose }) => {
         <input className="p-2 border rounded" placeholder="Price" type="number" name="price" value={form.price} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Stock Quantity" type="number" name="stockQuantity" value={form.stockQuantity} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Format" name="format" value={form.format} onChange={handleChange} required />
-        <input className="p-2 border rounded" placeholder="Cover Image URL" name="coverImageUrl" value={form.coverImageUrl} onChange={handleChange} />
+        <input className="p-2 border rounded" type="file" accept="image/*" placeholder="Cover Image URL" name="coverImageUrl" value={form.coverImageUrl} onChange={handleChange} />
         <input className="p-2 border rounded" placeholder="Publisher ID" name="publisherId" value={form.publisherId} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Author ID" name="authorId" value={form.authorId} onChange={handleChange} required />
 

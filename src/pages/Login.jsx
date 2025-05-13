@@ -39,8 +39,11 @@ const Login = () => {
         password: formData.password,
       });
 
-      const { token } = response.data;
+      const { token, refreshToken, userId, role } = response.data.data;
       localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("role", role);
       navigate("/Home");
     } catch (err) {
       console.error("Login error:", err);

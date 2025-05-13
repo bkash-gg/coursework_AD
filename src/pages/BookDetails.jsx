@@ -7,32 +7,39 @@ const BookDetails = () => {
   const [book, setBook] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-  const fetchBookDetails = async () => {
-    if (!id) {
-      console.error("No book ID found in URL");
-      return;
-    }
-
-    try {
-      const response = await fetch(`https://localhost:7098/api/books/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch book details');
+    const fetchBookDetails = async () => {
+      if (!id) {
+        setError("No book ID found in URL");
+        setLoading(false);
+        return;
       }
-      const data = await response.json();
-      if (data.success) {
-        setBook(data.data); // Use data.data to access the book details
-      } else {
-        console.error('Failed to fetch book details:', data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching book details:', error);
-    }
-  };
 
-  fetchBookDetails();
-}, [id]);
+      try {
+        const response = await axios.get(`https://localhost:7098/api/books/${id}`);
+        if (response.data.success) {
+          setBook(response.data.data); // Use response.data.data to access the book details
+        } else {
+          setError(response.data.message || 'Failed to fetch book details');
+        }
+      } catch (error) {
+        console.error('Error fetching book details:', error);
+        setError(error.message || 'Failed to connect to the server. Please check your connection and try again.');
+        
+        // If you're getting connection refused errors, you might want to check:
+        // 1. Is your backend server running?
+        // 2. Is the URL correct? (https://localhost:7098)
+        // 3. Are there any CORS issues? (you might need to configure CORS on your backend)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookDetails();
+  }, [id]);
 
   const handleQuantityChange = (value) => {
     const newQuantity = quantity + value;
@@ -45,8 +52,44 @@ const BookDetails = () => {
     setIsWishlisted(!isWishlisted);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading book details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md text-center">
+          <div className="text-red-500 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Error Loading Book</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-500">
+            If this persists, please check your internet connection or try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!book) {
-    return <div>Loading...</div>; // Show a loading message while data is being fetched
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600">No book data found.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -102,8 +145,8 @@ const BookDetails = () => {
                 <span className="text-3xl font-bold text-gray-900">
                   {book.price ? `$${book.price.toFixed(2)}` : 'Price not available'}
                 </span>
-                {book.stock > 0 && book.price && (
-                  <span className="ml-2 text-sm text-green-600">+ ${(book.price * 0.1).toFixed(2)} shipping</span>
+                {book.stockQuantity > 0 && book.price && (
+                  <span className="ml-2 text-sm text-green-600"></span>
                 )}
               </div>
 
@@ -117,7 +160,13 @@ const BookDetails = () => {
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500">Published Date</h3>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{book.publicationDate}</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900">
+                    {new Date(book.publicationDate).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500">Genre</h3>
@@ -162,12 +211,10 @@ const BookDetails = () => {
                   className={`px-6 py-3 rounded-lg font-medium transition-all ${book.stockQuantity > 0 ? 
                     'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg' : 
                     'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
-
                   disabled={book.stockQuantity <= 0}
                 >
                   {book.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
                 </button>
-
               </div>
             </div>
           </div>
