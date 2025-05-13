@@ -283,7 +283,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -313,7 +316,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -342,7 +348,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -371,7 +380,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -400,7 +412,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -429,7 +444,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -458,7 +476,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -487,7 +508,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -516,7 +540,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
@@ -574,7 +601,10 @@ namespace AD_Coursework.Services
                 PublisherName = book.Publisher?.Name ?? string.Empty,
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                DiscountPercentage = book.Discounts
+                    .FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)?
+                    .DiscountPercentage ?? 0f
             });
 
             return (bookDtos, totalCount);
