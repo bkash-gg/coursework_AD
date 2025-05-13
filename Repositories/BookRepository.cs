@@ -99,6 +99,13 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetBooksByAuthorCountAsync(Guid authorId)
+        {
+            return await _context.Books
+                .Where(b => b.AuthorId == authorId)
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<Book>> GetBooksByPublisherAsync(Guid publisherId, int page, int pageSize)
         {
             return await _context.Books
@@ -113,6 +120,13 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetBooksByPublisherCountAsync(Guid publisherId)
+        {
+            return await _context.Books
+                .Where(b => b.PublisherId == publisherId)
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<Book>> GetBooksByGenreAsync(Guid genreId, int page, int pageSize)
         {
             return await _context.Books
@@ -125,6 +139,13 @@ namespace AD_Coursework.Repositories
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetBooksByGenreCountAsync(Guid genreId)
+        {
+            return await _context.Books
+                .Where(b => b.BookGenres.Any(bg => bg.GenreId == genreId))
+                .CountAsync();
         }
 
         public async Task<IEnumerable<Book>> GetNewReleasesAsync(int page, int pageSize)
@@ -143,6 +164,13 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetNewReleasesCountAsync(DateTime fromDate)
+        {
+            return await _context.Books
+                .Where(b => b.PublicationDate >= fromDate && !b.IsComingSoon)
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<Book>> GetNewArrivalsAsync(int page, int pageSize)
         {
             var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
@@ -157,6 +185,13 @@ namespace AD_Coursework.Repositories
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetNewArrivalsCountAsync(DateTime fromDate)
+        {
+            return await _context.Books
+                .Where(b => b.CreatedAt >= fromDate)
+                .CountAsync();
         }
 
         public async Task<IEnumerable<Book>> GetBestSellersAsync(int page, int pageSize)
@@ -174,6 +209,13 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetBestSellersCountAsync()
+        {
+            return await _context.Books
+                .Where(b => b.OrderItems.Any()) 
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<Book>> GetAwardWinnersAsync(int page, int pageSize)
         {
             return await _context.Books
@@ -188,6 +230,13 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetAwardWinnersCountAsync()
+        {
+            return await _context.Books
+                .Where(b => b.IsAwardWinner)
+                .CountAsync();
+        }
+
         public async Task<IEnumerable<Book>> GetComingSoonBooksAsync(int page, int pageSize)
         {
             return await _context.Books
@@ -200,6 +249,13 @@ namespace AD_Coursework.Repositories
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetComingSoonBooksCountAsync()
+        {
+            return await _context.Books
+                .Where(b => b.IsComingSoon)
+                .CountAsync();
         }
 
         public async Task<IEnumerable<Book>> SearchBooksAsync(string searchTerm, int page, int pageSize)
@@ -219,7 +275,17 @@ namespace AD_Coursework.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Book>> FilterBooksAsync(
+        public async Task<int> SearchBooksCountAsync(string searchTerm)
+        {
+            return await _context.Books
+                .Where(b =>
+                    b.Title.Contains(searchTerm) ||
+                    b.ISBN.Contains(searchTerm) ||
+                    b.Description.Contains(searchTerm))
+                .CountAsync();
+        }
+
+        public async Task<(IEnumerable<Book> Books, int TotalCount)> FilterBooksAsync(
             string? searchTerm,
             List<Guid>? authorIds,
             List<Guid>? genreIds,
@@ -336,87 +402,14 @@ namespace AD_Coursework.Repositories
                 query = query.OrderBy(b => b.Title);
             }
 
-            return await query
+            var totalCount = await query.CountAsync();
+
+            var books = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-        }
 
-        public async Task<int> GetFilteredBooksCountAsync(
-            string? searchTerm,
-            List<Guid>? authorIds,
-            List<Guid>? genreIds,
-            List<Guid>? publisherIds,
-            decimal? minPrice,
-            decimal? maxPrice,
-            string? language,
-            string? format,
-            bool? isAvailable,
-            bool? isAwardWinner,
-            bool? isComingSoon)
-        {
-            var query = _context.Books.AsQueryable();
-
-            // Apply filters
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(b =>
-                    b.Title.Contains(searchTerm) ||
-                    b.ISBN.Contains(searchTerm) ||
-                    b.Description.Contains(searchTerm));
-            }
-
-            if (authorIds != null && authorIds.Any())
-            {
-                query = query.Where(b => authorIds.Contains(b.AuthorId));
-            }
-
-            if (genreIds != null && genreIds.Any())
-            {
-                query = query.Where(b => b.BookGenres.Any(bg => genreIds.Contains(bg.GenreId)));
-            }
-
-            if (publisherIds != null && publisherIds.Any())
-            {
-                query = query.Where(b => publisherIds.Contains(b.PublisherId));
-            }
-
-            if (minPrice.HasValue)
-            {
-                query = query.Where(b => b.Price >= minPrice.Value);
-            }
-
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(b => b.Price <= maxPrice.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(language))
-            {
-                query = query.Where(b => b.Language == language);
-            }
-
-            if (!string.IsNullOrWhiteSpace(format))
-            {
-                query = query.Where(b => b.Format == format);
-            }
-
-            if (isAvailable.HasValue)
-            {
-                query = query.Where(b => b.IsAvailable == isAvailable.Value);
-            }
-
-            if (isAwardWinner.HasValue)
-            {
-                query = query.Where(b => b.IsAwardWinner == isAwardWinner.Value);
-            }
-
-            if (isComingSoon.HasValue)
-            {
-                query = query.Where(b => b.IsComingSoon == isComingSoon.Value);
-            }
-
-            return await query.CountAsync();
+            return (books, totalCount);
         }
 
         public async Task AddBookGenreAsync(BookGenre bookGenre)
@@ -480,19 +473,33 @@ namespace AD_Coursework.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Book>> GetBooksWithDiscountsAsync(int page, int pageSize)
+        public async Task<(IEnumerable<Book> Books, int TotalCount)> GetBooksWithDiscountsAsync(int page, int pageSize)
         {
             var now = DateTime.UtcNow;
-            return await _context.Books
+
+            var query = _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
                 .Include(b => b.Discounts)
-                .Where(b => b.Discounts.Any(d => d.StartDate <= now && d.EndDate >= now))
+                .Where(b => b.Discounts.Any(d => d.StartDate <= now && d.EndDate >= now));
+
+            var totalCount = await query.CountAsync();
+
+            var books = await query
                 .OrderBy(b => b.Title)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .ToListAsync();
+
+            return (books, totalCount);
+        }
+
+        public async Task<IEnumerable<Discount>> GetActiveDiscountsAsync(DateTime currentDate)
+        {
+            return await _context.Discounts
+                .Where(d => d.StartDate <= currentDate && d.EndDate >= currentDate)
                 .ToListAsync();
         }
     }

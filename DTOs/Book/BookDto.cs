@@ -1,6 +1,4 @@
-﻿using AD_Coursework.DTOs.Review;
-
-namespace AD_Coursework.DTOs.Book
+﻿namespace AD_Coursework.DTOs.Book
 {
     public class BookDto
     {

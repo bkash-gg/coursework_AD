@@ -2,6 +2,7 @@
 using AD_Coursework.Interfaces.Services;
 using AD_Coursework.DTOs.Book;
 using Microsoft.AspNetCore.Mvc;
+using AD_Coursework.Models;
 
 namespace AD_Coursework.Controllers
 {
@@ -11,13 +12,14 @@ namespace AD_Coursework.Controllers
     {
         private readonly IBookService _bookService;
 
+        // Constructor that initializes the book service and logger
         public BookController(IBookService bookService, ILogger<BookController> logger)
             : base(logger)
         {
             _bookService = bookService;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
@@ -70,7 +72,7 @@ namespace AD_Coursework.Controllers
                 }
 
                 var book = await _bookService.CreateAsync(bookCreateDto);
-                return Success(book, "Book created successfully", StatusCodes.Status201Created);
+                return Success<Object>(null, "Book created successfully", StatusCodes.Status201Created);
             }
             catch (Exception ex)
             {
@@ -78,7 +80,7 @@ namespace AD_Coursework.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}/update")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromForm] BookUpdateDto bookUpdateDto)
         {
@@ -90,7 +92,12 @@ namespace AD_Coursework.Controllers
                 }
 
                 var book = await _bookService.UpdateAsync(id, bookUpdateDto);
-                return book == null ? NotFound() : Success(book, "Book updated successfully");
+                if (!book)
+                {
+                    return Error("Book not found.", StatusCodes.Status404NotFound);
+                }
+
+                return Success<Object>(null, "Book details updated successfully.");
             }
             catch (Exception ex)
             {
@@ -98,7 +105,7 @@ namespace AD_Coursework.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/delete")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
