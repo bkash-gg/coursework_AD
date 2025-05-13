@@ -13,6 +13,7 @@ import axios from "axios";
 
 const SignUp = () => {
   // const navigate = useNavigate();
+  const [passwordValid, setPasswordValid] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
@@ -27,7 +28,23 @@ const SignUp = () => {
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-    setError(""); // Clear error when user types
+
+    // Validate password and confirm password
+    if (id === "password" || id === "confirmPassword") {
+      const password = formData.password;
+      const confirmPassword = formData.confirmPassword;
+      setPasswordValid(password === confirmPassword);
+    }
+
+    // Validate password strength
+    if (id === "password") {
+      const passwordStrength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+      if (!passwordStrength.test(value)) {
+        setError("Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.");
+      } else {
+        setError("");
+      }
+    }
   };
   const payload = {
     email: formData.email,
@@ -37,7 +54,7 @@ const SignUp = () => {
     };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+  e.preventDefault();  
   try {
     const response = await axios.post(
       "https://localhost:7098/api/auth/register", payload,
@@ -67,9 +84,9 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-[96.5vh] flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Left column - Enhanced background */}
-      <div className="hidden min-h-[96.5vh] md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
+      <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-[10%] left-[20%] w-40 h-40 rounded-full bg-white animate-float"></div>
@@ -89,7 +106,7 @@ const SignUp = () => {
       </div>
 
       {/* Right column - Enhanced form */}
-      <div className="flex flex-grow min-h-[96.5vh] bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
+      <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
             <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
