@@ -11,12 +11,14 @@ namespace AD_Coursework.Controllers
     {
         private readonly IGenreService _genreService;
 
+        // Constructor that initializes the genre service and logger
         public GenreController(IGenreService genreService, ILogger<GenreController> logger)
             : base(logger)
         {
             _genreService = genreService;
         }
 
+        // Retrieves all genres from the database
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -32,10 +34,12 @@ namespace AD_Coursework.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve genres.");
+                _logger.LogError(ex, "Error occurred while fetching genres.");
+                return HandleException(ex, "Unable to retrieve genres. Please try again later.");
             }
         }
 
+        // Retrieves a specific genre by its unique identifier
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -51,10 +55,12 @@ namespace AD_Coursework.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve genre.");
+                _logger.LogError(ex, "Error occurred while fetching genre.");
+                return HandleException(ex, "Unable to retrieve genre. Please try again later.");
             }
         }
 
+        // Creates a new genre record (admin only)
         [HttpPost("add")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] GenreCreateDto genreCreateDto)
@@ -63,7 +69,7 @@ namespace AD_Coursework.Controllers
             {
                 if (genreCreateDto == null)
                 {
-                    return Error("Request body cannot be empty.", StatusCodes.Status400BadRequest);
+                    return Error("Please provide genre details.", StatusCodes.Status400BadRequest);
                 }
 
                 if (!ModelState.IsValid)
@@ -78,20 +84,23 @@ namespace AD_Coursework.Controllers
                 var genre = await _genreService.CreateAsync(genreCreateDto);
                 return Success(
                     genre,
-                    "Genre created successfully!",
+                    "Genre created successfully.",
                     StatusCodes.Status201Created
                 );
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error occurred while creating genre.");
                 return Error(ex.Message, StatusCodes.Status400BadRequest);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to create genre.");
+                _logger.LogError(ex, "Error occurred while creating genre.");
+                return HandleException(ex, "Unable to create genre. Please try again.");
             }
         }
 
+        // Updates an existing genre's information (admin only)
         [HttpPut("{id}/update")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] GenreUpdateDto genreUpdateDto)
@@ -100,7 +109,7 @@ namespace AD_Coursework.Controllers
             {
                 if (genreUpdateDto == null)
                 {
-                    return Error("Request body cannot be empty.", StatusCodes.Status400BadRequest);
+                    return Error("Please provide updated genre details.", StatusCodes.Status400BadRequest);
                 }
 
                 if (!ModelState.IsValid)
@@ -118,18 +127,21 @@ namespace AD_Coursework.Controllers
                     return Error("Genre not found.", StatusCodes.Status404NotFound);
                 }
 
-                return Success(genre, "Genre updated successfully!");
+                return Success(genre, "Genre updated successfully.");
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Error occurred while updating genre.");
                 return Error(ex.Message, StatusCodes.Status400BadRequest);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to update genre.");
+                _logger.LogError(ex, "Error occurred while updating genre.");
+                return HandleException(ex, "Unable to update genre. Please try again.");
             }
         }
 
+        // Permanently removes a genre from the system (admin only)
         [HttpDelete("{id}/delete")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
@@ -142,11 +154,12 @@ namespace AD_Coursework.Controllers
                     return Error("Genre not found.", StatusCodes.Status404NotFound);
                 }
 
-                return Success<object>(null, "Genre deleted successfully!");
+                return Success<object>(null, "Genre deleted successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to delete genre.");
+                _logger.LogError(ex, "Error occurred while deleting genre.");
+                return HandleException(ex, "Unable to delete genre. Please try again.");
             }
         }
     }
