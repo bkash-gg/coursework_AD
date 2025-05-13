@@ -28,7 +28,7 @@ const Home = () => {
       >
         <div className="mx-auto text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            New Realeases & Bestsellers
+            New Releases & Bestsellers
           </h2>
           <Carousel
             showThumbs={false}
@@ -71,10 +71,10 @@ const Home = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-12 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
-            Top Genere
+            Featured Genres
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {[
+            {[ 
               {
                 name: "Arts & Photography",
                 icon: (
