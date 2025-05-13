@@ -32,14 +32,48 @@ const AddBookForm = ({ onClose }) => {
     console.log("Submitted book:", form);
 
     try {
-      // Send the POST request to your backend API
-      const response = await axios.post("https://localhost:7098/api/books/add", form); // Use your backend URL here
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to add a book');
+        return;
+      }
+
+      // Create FormData to handle file upload
+      const formData = new FormData();
+      for (const key in form) {
+        if (key === 'coverImageUrl' && form[key] instanceof File) {
+          formData.append('file', form[key]);
+        } else {
+          formData.append(key, form[key]);
+        }
+      }
+
+      const response = await axios.post(
+        "https://localhost:7098/api/books/add", 
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      
       console.log("Book added:", response.data);
       onClose();
     } catch (error) {
       console.error("Error adding book:", error);
+      alert(`Error adding book: ${error.response?.data?.message || error.message}`);
     }
   };
+
+  const handleFileChange = (e) => {
+    setForm({
+      ...form,
+      coverImageUrl: e.target.files[0] // Store the file object
+    });
+  };
+
 
   return (
     <div className="bg-white p-6 rounded shadow mb-6 border">
@@ -52,7 +86,7 @@ const AddBookForm = ({ onClose }) => {
         <input className="p-2 border rounded" placeholder="Price" type="number" name="price" value={form.price} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Stock Quantity" type="number" name="stockQuantity" value={form.stockQuantity} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Format" name="format" value={form.format} onChange={handleChange} required />
-        <input className="p-2 border rounded" type="file" accept="image/*" placeholder="Cover Image URL" name="coverImageUrl" value={form.coverImageUrl} onChange={handleChange} />
+        <input className="p-2 border rounded" type="file" accept="image/*" placeholder="Cover Image URL" name="coverImageUrl" value={form.coverImageUrl}  onChange={handleFileChange} />
         <input className="p-2 border rounded" placeholder="Publisher ID" name="publisherId" value={form.publisherId} onChange={handleChange} required />
         <input className="p-2 border rounded" placeholder="Author ID" name="authorId" value={form.authorId} onChange={handleChange} required />
 

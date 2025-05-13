@@ -88,10 +88,10 @@ const Cart = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center">
                     <img
-                      src={item.img}
-                      alt={item.title}
+                      // src={item.img}
+                      // alt={item.title}
                       className="w-24 h-24 object-contain rounded mb-4 sm:mb-0 sm:mr-6"
-                      onError={(e) => (e.target.src = 'https://via.placeholder.com/150')}
+                      onError={(e) => (e.target.src )}
                     />
 
                     <div className="flex-1">
