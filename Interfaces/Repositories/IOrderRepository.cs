@@ -5,13 +5,12 @@ namespace AD_Coursework.Interfaces.Repositories
     public interface IOrderRepository
     {
         Task<Order?> GetOrderByIdAsync(Guid orderId);
-        Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId);
         Task<Order> CreateOrderAsync(Order order);
         Task<Order> UpdateOrderAsync(Order order);
-        Task<bool> DeleteOrderAsync(Guid orderId);
-        Task<OrderItem?> GetOrderItemAsync(Guid orderId, Guid bookId);
+        Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId);
+        Task<Order?> GetOrderByClaimCodeAsync(Guid userId, string claimCode);
+        Task<int> GetSuccessfulOrderCountAsync(Guid userId);
         Task<OrderItem> AddOrderItemAsync(OrderItem orderItem);
-        Task<bool> RemoveOrderItemAsync(Guid orderId, Guid bookId);
-        Task<int> GetUserOrderCountAsync(Guid userId);
+        Task<IEnumerable<OrderItem>> GetOrderItemsAsync(Guid orderId);
     }
 }

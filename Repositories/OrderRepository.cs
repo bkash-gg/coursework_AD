@@ -23,15 +23,6 @@ namespace AD_Coursework.Repositories
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId)
-        {
-            return await _context.Orders
-                .Where(o => o.UserId == userId)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Book)
-                .ToListAsync();
-        }
-
         public async Task<Order> CreateOrderAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
@@ -46,20 +37,28 @@ namespace AD_Coursework.Repositories
             return order;
         }
 
-        public async Task<bool> DeleteOrderAsync(Guid orderId)
+        public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order == null) return false;
-
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+                .ToListAsync();
         }
 
-        public async Task<OrderItem?> GetOrderItemAsync(Guid orderId, Guid bookId)
+        public async Task<Order?> GetOrderByClaimCodeAsync(Guid userId, string claimCode)
         {
-            return await _context.OrderItems
-                .FirstOrDefaultAsync(oi => oi.OrderId == orderId && oi.BookId == bookId);
+            return await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.ClaimCode == claimCode);
+        }
+
+        public async Task<int> GetSuccessfulOrderCountAsync(Guid userId)
+        {
+            return await _context.Orders
+                .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Completed);
         }
 
         public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem)
@@ -69,23 +68,12 @@ namespace AD_Coursework.Repositories
             return orderItem;
         }
 
-        public async Task<bool> RemoveOrderItemAsync(Guid orderId, Guid bookId)
+        public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(Guid orderId)
         {
-            var orderItem = await _context.OrderItems
-                .FirstOrDefaultAsync(oi => oi.OrderId == orderId && oi.BookId == bookId);
-
-            if (orderItem == null) return false;
-
-            _context.OrderItems.Remove(orderItem);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<int> GetUserOrderCountAsync(Guid userId)
-        {
-            return await _context.Orders
-                .Where(o => o.UserId == userId && o.Status == OrderStatus.Completed)
-                .CountAsync();
+            return await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .Include(oi => oi.Book)
+                .ToListAsync();
         }
     }
 }

@@ -37,7 +37,7 @@ namespace AD_Coursework.Services.Utilities
                 <html>
                 <body>
                     <h1>Order Confirmation</h1>
-                    <p>Dear Valued Customer,</p>
+                    <p>Dear Valued Customer,{order.User.FullName}</p>
                     <p>Thank you for your order with our bookstore!</p>
                     
                     <h2>Order Summary</h2>

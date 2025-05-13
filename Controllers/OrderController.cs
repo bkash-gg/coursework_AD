@@ -19,122 +19,161 @@ namespace AD_Coursework.Controllers
             _orderService = orderService;
         }
 
-        [HttpGet("{orderId}")]
-        public async Task<IActionResult> GetOrderById(Guid orderId)
+        [HttpPost]
+        [Authorize(Roles = "Member")]
+        public async Task<IActionResult> PlaceOrder([FromBody] OrderCreateDto orderCreateDto)
         {
             try
             {
-                var order = await _orderService.GetOrderByIdAsync(orderId);
+                if (!ModelState.IsValid)
+                {
+                    return Error("Invalid order information.", StatusCodes.Status400BadRequest, ModelState);
+                }
+
+                var userId = User.GetUserId();
+                var order = await _orderService.PlaceOrderAsync(userId, orderCreateDto);
+                return Success(order, "Your order has been placed successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation while placing order for user ID: {User.GetUserId()}");
+                return Error(ex.Message, StatusCodes.Status400BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while placing order for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't place your order. Please try again later.");
+            }
+        }
+
+        [HttpGet("{orderId}")]
+        public async Task<IActionResult> GetOrder(Guid orderId)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var order = await _orderService.GetOrderByIdAsync(userId, orderId);
                 return Success(order, "Order retrieved successfully.");
             }
             catch (KeyNotFoundException ex)
             {
-                return Error(ex.Message, StatusCodes.Status404NotFound);
+                _logger.LogWarning(ex, $"Order not found for user ID: {User.GetUserId()}");
+                return Error("Order not found.", StatusCodes.Status404NotFound);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve order");
+                _logger.LogError(ex, $"An error occurred while retrieving order for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't retrieve your order. Please try again later.");
             }
         }
 
-        [HttpGet("user")]
+        [HttpGet]
         public async Task<IActionResult> GetUserOrders()
         {
             try
             {
                 var userId = User.GetUserId();
                 var orders = await _orderService.GetUserOrdersAsync(userId);
-                return Success(orders, "User orders retrieved successfully.");
+                return Success(orders, "Your orders have been retrieved successfully.");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to retrieve user orders");
+                _logger.LogError(ex, $"An error occurred while retrieving orders for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't retrieve your orders. Please try again later.");
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return Error("Invalid data", StatusCodes.Status400BadRequest, ModelState);
-                }
-
-                var userId = User.GetUserId();
-                orderCreateDto.UserId = userId; 
-
-                var order = await _orderService.CreateOrderAsync(orderCreateDto);
-                return Success(order, "Order created successfully.", StatusCodes.Status201Created);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Error(ex.Message, StatusCodes.Status404NotFound);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Error(ex.Message, StatusCodes.Status400BadRequest);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, "Failed to create order");
-            }
-        }
-
-        [HttpPut("{orderId}")]
-        public async Task<IActionResult> UpdateOrder(Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return Error("Invalid data", StatusCodes.Status400BadRequest, ModelState);
-                }
-
-                var order = await _orderService.UpdateOrderAsync(orderId, orderUpdateDto);
-                return Success(order, "Order updated successfully.");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Error(ex.Message, StatusCodes.Status404NotFound);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Error(ex.Message, StatusCodes.Status400BadRequest);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, "Failed to update order");
-            }
-        }
-
-        [HttpDelete("{orderId}")]
-        public async Task<IActionResult> CancelOrder(Guid orderId, [FromQuery] string cancellationReason)
+        [HttpPost("{orderId}/cancel")]
+        [Authorize(Roles = "Member")]
+        public async Task<IActionResult> CancelOrder(Guid orderId, [FromBody] string cancellationReason)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(cancellationReason))
                 {
-                    return Error("Cancellation reason is required", StatusCodes.Status400BadRequest);
+                    return Error("Cancellation reason is required.", StatusCodes.Status400BadRequest);
                 }
 
-                var success = await _orderService.CancelOrderAsync(orderId, cancellationReason);
-                return success
-                    ? Success<object>(null, "Order cancelled successfully.")
-                    : Error("Failed to cancel order", StatusCodes.Status400BadRequest);
+                var userId = User.GetUserId();
+                var order = await _orderService.CancelOrderAsync(userId, orderId, cancellationReason);
+                return Success(order, "Your order has been cancelled successfully.");
             }
             catch (KeyNotFoundException ex)
             {
-                return Error(ex.Message, StatusCodes.Status404NotFound);
+                _logger.LogWarning(ex, $"Order not found while cancelling for user ID: {User.GetUserId()}");
+                return Error("Order not found.", StatusCodes.Status404NotFound);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogWarning(ex, $"Invalid operation while cancelling order for user ID: {User.GetUserId()}");
                 return Error(ex.Message, StatusCodes.Status400BadRequest);
             }
             catch (Exception ex)
             {
-                return HandleException(ex, "Failed to cancel order");
+                _logger.LogError(ex, $"An error occurred while cancelling order for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't cancel your order. Please try again later.");
+            }
+        }
+
+        [HttpPost("process")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ProcessOrder([FromQuery] Guid userId, [FromQuery] string claimCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(claimCode))
+                {
+                    return Error("Claim code is required.", StatusCodes.Status400BadRequest);
+                }
+
+                var order = await _orderService.ProcessOrderAsync(userId, claimCode);
+                return Success(order, "Order processed successfully.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Order not found while processing for user ID: {userId}");
+                return Error("Order not found with the provided claim code.", StatusCodes.Status404NotFound);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation while processing order for user ID: {userId}");
+                return Error(ex.Message, StatusCodes.Status400BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while processing order for user ID: {userId}");
+                return HandleException(ex, "We couldn't process this order. Please try again later.");
+            }
+        }
+
+        [HttpPost("complete")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> CompleteOrder([FromQuery] Guid userId, [FromQuery] string claimCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(claimCode))
+                {
+                    return Error("Claim code is required.", StatusCodes.Status400BadRequest);
+                }
+
+                var order = await _orderService.CompleteOrderAsync(userId, claimCode);
+                return Success(order, "Order completed successfully.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Order not found while completing for user ID: {userId}");
+                return Error("Order not found with the provided claim code.", StatusCodes.Status404NotFound);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation while completing order for user ID: {userId}");
+                return Error(ex.Message, StatusCodes.Status400BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while completing order for user ID: {userId}");
+                return HandleException(ex, "We couldn't complete this order. Please try again later.");
             }
         }
     }
