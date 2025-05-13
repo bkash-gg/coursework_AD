@@ -1,7 +1,4 @@
 ﻿using AD_Coursework.DTOs.Discount;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AD_Coursework.Interfaces.Services
 {

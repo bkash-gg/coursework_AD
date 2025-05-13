@@ -2,11 +2,6 @@
 using AD_Coursework.Interfaces.Repositories;
 using AD_Coursework.Interfaces.Services;
 using AD_Coursework.Models;
-using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AD_Coursework.Services
 {
