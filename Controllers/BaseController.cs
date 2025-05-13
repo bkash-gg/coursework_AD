@@ -9,12 +9,11 @@ namespace AD_Coursework.Controllers
     {
         protected readonly ILogger<BaseController> _logger;
 
-        public BaseController(ILogger<BaseController> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        // Constructor that initializes the logger for the controller
+        public BaseController(ILogger<BaseController> logger) => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        private ApiResponse<T> CreateApiResponse<T>(bool success, int statusCode, string message, T data = default, object errors = null)
+        // Private helper method to create standardized API response objects
+        private static ApiResponse<T> CreateApiResponse<T>(bool success, int statusCode, string message, T? data = default, object? errors = null)
         {
             return new ApiResponse<T>
             {
@@ -27,24 +26,24 @@ namespace AD_Coursework.Controllers
             };
         }
 
-        protected IActionResult Success<T>(T data = default, string message = "Operation completed successfully", int statusCode = StatusCodes.Status200OK)
+        // Returns a success response with the specified data and message
+        protected IActionResult Success<T>(T? data = default, string message = "Operation completed successfully", int statusCode = StatusCodes.Status200OK)
         {
             var response = CreateApiResponse(true, statusCode, message, data, null);
             return new ObjectResult(response) { StatusCode = statusCode };
         }
 
-        protected IActionResult Error(string message, int statusCode = StatusCodes.Status400BadRequest, object errors = null)
+        // Returns an error response with the specified message and status code
+        protected IActionResult Error(string message, int statusCode = StatusCodes.Status400BadRequest, object? errors = null)
         {
-            _logger.LogError("Error response: {StatusCode} - {Message}", statusCode, message);
+            _logger.LogError("Returning error response. StatusCode: {StatusCode}, Message: {Message}", statusCode, message);
             var response = CreateApiResponse<object>(false, statusCode, message, null, errors);
             return new ObjectResult(response) { StatusCode = statusCode };
         }
 
-        protected IActionResult HandleException(Exception ex, string userMessage = null)
+        // Handles exceptions by logging them and returning an appropriate error response
+        protected IActionResult HandleException(Exception ex, string? userMessage = null)
         {
-            _logger.LogError(ex, "Exception caught: {ExceptionType} - {ExceptionMessage}",
-                ex.GetType().Name, ex.Message);
-
             var statusCode = DetermineStatusCode(ex);
             var message = !string.IsNullOrEmpty(userMessage)
                 ? userMessage
@@ -52,11 +51,14 @@ namespace AD_Coursework.Controllers
 
             var errorDetails = GetErrorDetails(ex);
 
+            _logger.LogError(ex, "Exception occurred. StatusCode: {StatusCode}, Message: {Message}, Exception: {ExceptionType}", statusCode, message, ex.GetType().Name);
+
             var response = CreateApiResponse<object>(false, statusCode, message, null, errorDetails);
             return new ObjectResult(response) { StatusCode = statusCode };
         }
 
-        private int DetermineStatusCode(Exception ex)
+        // Determines the appropriate HTTP status code based on the exception type
+        private static int DetermineStatusCode(Exception ex)
         {
             return ex switch
             {
@@ -71,7 +73,8 @@ namespace AD_Coursework.Controllers
             };
         }
 
-        private string GetUserFriendlyMessage(Exception ex)
+        // Provides a user-friendly message based on the exception type
+        private static string GetUserFriendlyMessage(Exception ex)
         {
             return ex switch
             {
@@ -85,7 +88,8 @@ namespace AD_Coursework.Controllers
             };
         }
 
-        private object GetErrorDetails(Exception ex)
+        // Returns detailed error information in development environment only
+        private static object GetErrorDetails(Exception ex)
         {
             var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
@@ -94,25 +98,21 @@ namespace AD_Coursework.Controllers
                 return new
                 {
                     Type = ex.GetType().Name,
-                    Message = ex.Message,
+                    ex.Message,
                     StackTrace = ex.StackTrace?.Split('\n'),
                     InnerException = ex.InnerException != null ? new
                     {
                         Type = ex.InnerException.GetType().Name,
-                        Message = ex.InnerException.Message
+                        ex.InnerException.Message
                     } : null
                 };
             }
 
-            return null;
+            return null!;
         }
 
-        protected IActionResult Paginated<T>(
-            IEnumerable<T> items,
-            int totalCount,
-            int page,
-            int pageSize,
-            string message = "Data retrieved successfully")
+        // Returns a paginated response with metadata for the client to handle pagination
+        protected IActionResult Paginated<T>(IEnumerable<T> items, int totalCount, int page, int pageSize, string message = "Data retrieved successfully")
         {
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -136,6 +136,7 @@ namespace AD_Coursework.Controllers
         }
     }
 
+    // Generic API response model used for standardizing API output
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
@@ -144,7 +145,6 @@ namespace AD_Coursework.Controllers
 
         public string? Message { get; set; }
 
-        
         public T? Data { get; set; }
 
         public object? Errors { get; set; }
