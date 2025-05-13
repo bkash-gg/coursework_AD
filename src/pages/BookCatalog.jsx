@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext'; // Uncommented and using the c
 import axios from 'axios';
 
 const CATEGORY_ENDPOINTS = {
-  all: 'https://localhost:7098/api/books',
+  all: 'https://localhost:7098/api/books/all',
   bestsellers: 'https://localhost:7098/api/books/best-sellers',
   awardWinners: 'https://localhost:7098/api/books/award-winners',
   newReleases: 'https://localhost:7098/api/books/new-releases',
