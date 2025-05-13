@@ -82,20 +82,17 @@ const Home = () => {
       {/* Bestselling Books */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
-          <div className="flex justify-between items-center mb-8">
-            <p></p>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
               Top sellers
             </h2>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
             <button className="text-[#3B6CF7] font-semibold hover:underline flex items-center">
               View All <span className="ml-2">→</span>
             </button>
           </div>
-          {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
-            <button className="text-[#3B6CF7] font-semibold hover:underline flex items-center">
-              View All <span className="ml-2">→</span>
-            </button>
-          </div> */}
+          <br />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
             {[...Array(5)].map((_, i) => (
               <div 
