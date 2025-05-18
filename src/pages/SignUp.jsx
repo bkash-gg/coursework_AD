@@ -18,6 +18,12 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   // const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -25,24 +31,70 @@ const SignUp = () => {
     confirmPassword: "",
   });
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateUsername = (username) => {
+    return username.length >= 3 && username.length <= 20;
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
 
-    // Validate password and confirm password
-    if (id === "password" || id === "confirmPassword") {
-      const password = formData.password;
-      const confirmPassword = formData.confirmPassword;
-      setPasswordValid(password === confirmPassword);
+    // Clear previous error for this field
+    setValidationErrors((prev) => ({ ...prev, [id]: "" }));
+
+    // Validate email
+    if (id === "email") {
+      if (!validateEmail(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          email: "Please enter a valid email address",
+        }));
+      }
     }
 
-    // Validate password strength
+    // Validate username
+    if (id === "username") {
+      if (!validateUsername(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          username: "Username must be between 3 and 20 characters",
+        }));
+      }
+    }
+
+    // Validate password
     if (id === "password") {
-      const passwordStrength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-      if (!passwordStrength.test(value)) {
-        setError("Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.");
+      if (!validatePassword(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          password: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters",
+        }));
+      }
+    }
+
+    // Validate password match
+    if (id === "password" || id === "confirmPassword") {
+      const password = id === "password" ? value : formData.password;
+      const confirmPassword = id === "confirmPassword" ? value : formData.confirmPassword;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Passwords do not match",
+        }));
+        setPasswordValid(false);
       } else {
-        setError("");
+        setPasswordValid(true);
       }
     }
   };
@@ -54,26 +106,71 @@ const SignUp = () => {
     };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();  
-  try {
-    const response = await axios.post(
-      "https://localhost:7098/api/auth/register", payload,
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    console.log(response.data);
-  } catch (error) {
-    console.error("Full error:", error);
-    if (error.response) {
-      setError(error.response.data.message);
-    } else {
-      setError("Cannot connect to server. Is the backend running?");
+    e.preventDefault();
+    
+    // Reset all validation errors
+    const newValidationErrors = {
+      email: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    // Check for empty fields
+    if (!formData.email.trim()) {
+      newValidationErrors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      newValidationErrors.email = "Please enter a valid email address";
     }
-  }
-};
+
+    if (!formData.username.trim()) {
+      newValidationErrors.username = "Username is required";
+    } else if (!validateUsername(formData.username)) {
+      newValidationErrors.username = "Username must be between 3 and 20 characters";
+    }
+
+    if (!formData.password) {
+      newValidationErrors.password = "Password is required";
+    } else if (!validatePassword(formData.password)) {
+      newValidationErrors.password = "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters";
+    }
+
+    if (!formData.confirmPassword) {
+      newValidationErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      newValidationErrors.confirmPassword = "Passwords do not match";
+    }
+
+    // Update validation errors state
+    setValidationErrors(newValidationErrors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(newValidationErrors).some(error => error !== "");
+    if (hasErrors) {
+      return; // Don't proceed with form submission if there are errors
+    }
+
+    // If no errors, proceed with the API call
+    try {
+      const response = await axios.post(
+        "https://localhost:7098/api/auth/register",
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("Full error:", error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError("Cannot connect to server. Is the backend running?");
+      }
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -133,11 +230,13 @@ const SignUp = () => {
               <input
                 type="email"
                 id="email"
-                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 border-2 ${
+                  validationErrors.email ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
                 value={formData.email}
                 onChange={handleChange}
-                required
+                
               />
               <label
                 htmlFor="email"
@@ -146,6 +245,9 @@ const SignUp = () => {
                 Email Address
               </label>
               <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
+              {validationErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Username Input */}
@@ -153,11 +255,13 @@ const SignUp = () => {
               <input
                 type="text"
                 id="username"
-                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 border-2 ${
+                  validationErrors.username ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
                 value={formData.username}
                 onChange={handleChange}
-                required
+                
               />
               <label
                 htmlFor="username"
@@ -166,6 +270,9 @@ const SignUp = () => {
                 Username
               </label>
               <MdPerson className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
+              {validationErrors.username && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.username}</p>
+              )}
             </div>
 
             {/* Password Input */}
@@ -173,11 +280,13 @@ const SignUp = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 pr-12 border-2 ${
+                  validationErrors.password ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
                 value={formData.password}
                 onChange={handleChange}
-                required
+                
               />
               <label
                 htmlFor="password"
@@ -197,6 +306,9 @@ const SignUp = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
+              {validationErrors.password && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -204,11 +316,13 @@ const SignUp = () => {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirmPassword"
-                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 pr-12 border-2 ${
+                  validationErrors.confirmPassword ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                required
+              
               />
               <label
                 htmlFor="confirmPassword"
@@ -228,6 +342,9 @@ const SignUp = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
+              {validationErrors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.confirmPassword}</p>
+              )}
             </div>
 
             <Button

@@ -63,7 +63,7 @@ const BookCatalog = () => {
       }
 
       await axios.post(
-        'https://localhost:7098/api/wishlist', // Fixed endpoint (changed from whitelist to wishlist)
+        'https://localhost:7098/api/whitelist', 
         { bookId: book.id },
         {
           headers: {

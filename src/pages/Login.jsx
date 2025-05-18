@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   MdMail,
   MdLock,
+  MdPerson,
   MdOutlineVisibility,
   MdOutlineVisibilityOff,
 } from "react-icons/md";
@@ -12,12 +13,21 @@ import axios from "axios";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -27,11 +37,44 @@ const Login = () => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setError(""); // Clear error when user types
+    
+    // Clear validation error for the field being changed
+    setValidationErrors(prev => ({
+      ...prev,
+      [id]: ""
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    // Reset validation errors
+    const newValidationErrors = {
+      email: "",
+      password: "",
+    };
+
+    // Validate email
+    if (!formData.email.trim()) {
+      newValidationErrors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      newValidationErrors.email = "Please enter a valid email address";
+    }
+
+    // Validate password
+    if (!formData.password) {
+      newValidationErrors.password = "Password is required";
+    }
+
+    // Update validation errors
+    setValidationErrors(newValidationErrors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(newValidationErrors).some(error => error !== "");
+    if (hasErrors) {
+      return; // Don't proceed with login if there are validation errors
+    }
 
     try {
       const response = await axios.post("https://localhost:7098/api/auth/login", {
@@ -63,11 +106,7 @@ const Login = () => {
         </div>
 
         <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 shadow-xl relative z-10 transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="w-20 h-20 opacity-100 animate-bounce-in"
-          />
+          <MdPerson className="text-white h-20 w-20 opacity-90 animate-bounce-in" />
         </div>
         <h2 className="text-4xl font-bold mb-4 relative z-10 animate-slide-in">
           Welcome Back!
@@ -104,9 +143,10 @@ const Login = () => {
                 id="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 border-2 ${
+                  validationErrors.email ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
-                required
               />
               <label
                 htmlFor="email"
@@ -115,6 +155,9 @@ const Login = () => {
                 Email Address
               </label>
               <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
+              {validationErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Password input with enhanced interactions */}
@@ -124,9 +167,10 @@ const Login = () => {
                 id="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent"
+                className={`w-full px-4 py-3 pl-12 pr-12 border-2 ${
+                  validationErrors.password ? "border-red-500" : "border-gray-200"
+                } rounded-xl focus:border-[#3B6CF7] focus:ring-0 peer transition-all duration-300 hover:border-gray-300 placeholder-transparent`}
                 placeholder=" "
-                required
               />
               <label
                 htmlFor="password"
@@ -146,6 +190,9 @@ const Login = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
+              {validationErrors.password && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
+              )}
             </div>
 
             <Button
