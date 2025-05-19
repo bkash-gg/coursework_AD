@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Books from "./pages/Admin/Books";
 import Orders from "./pages/Admin/Orders";
 import Announcements from "./pages/Admin/Announcements";
+import Discounts from "./pages/Admin/Discounts";
 
 // Staff Pages
 import StaffLayout from "./pages/Staff/StaffLayout";
@@ -74,8 +75,9 @@ function AppRoutes() {
             <AdminLayout />
           </ProtectedRoute>
         }>
-          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="books" element={<Books />} />
+          <Route path="discounts" element={<Discounts />} />
           <Route path="orders" element={<Orders />} />
           <Route path="announcements" element={<Announcements />} />
         </Route>

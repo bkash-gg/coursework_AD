@@ -22,7 +22,7 @@ const AdminLayout = () => {
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/books", label: "Manage Books", icon: BookOpen },
-    { path: "/admin/orders", label: "Manage Orders", icon: ShoppingCart },
+    { path: "/admin/discounts", label: "Manage Discounts", icon: ShoppingCart },
     { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
   ];
 

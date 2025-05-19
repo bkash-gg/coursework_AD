@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import axios from "axios"
 
@@ -8,6 +7,20 @@ const Books = () => {
   const [editingBook, setEditingBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [authors, setAuthors] = useState([])
+  const [publishers, setPublishers] = useState([])
+  const [genres, setGenres] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [toast, setToast] = useState({ show: false, message: '', type: '' })
+  const [paginationMetadata, setPaginationMetadata] = useState({
+    currentPage: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 1,
+    hasPrevious: false,
+    hasNext: false
+  })
   const [form, setForm] = useState({
     title: "",
     isbn: "",
@@ -23,14 +36,32 @@ const Books = () => {
     isComingSoon: false,
     publisherId: "",
     authorId: "",
+    genreIds: [],
   })
+  const [showGenreDropdown, setShowGenreDropdown] = useState(false)
 
-  // Fetch all books
+  // Show toast message
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: '' })
+    }, 3000)
+  }
+
+  // Fetch all books with pagination
   const fetchBooks = async () => {
     try {
       setLoading(true)
-      const response = await axios.get("https://localhost:7098/api/books/all")
+      const response = await axios.get(`https://localhost:7098/api/books/all?page=${currentPage}&pageSize=${pageSize}`)
       setBooks(response.data.data?.items || [])
+      setPaginationMetadata(response.data.data?.metadata || {
+        currentPage: 1,
+        pageSize: 10,
+        totalItems: 0,
+        totalPages: 1,
+        hasPrevious: false,
+        hasNext: false
+      })
       setError(null)
     } catch (error) {
       console.error("Error fetching books:", error)
@@ -41,16 +72,73 @@ const Books = () => {
     }
   }
 
+  // Fetch authors
+  const fetchAuthors = async () => {
+    try {
+      const response = await axios.get("https://localhost:7098/api/author/all")
+      setAuthors(response.data.data || [])
+    } catch (error) {
+      console.error("Error fetching authors:", error)
+    }
+  }
+
+  // Fetch publishers
+  const fetchPublishers = async () => {
+    try {
+      const response = await axios.get("https://localhost:7098/api/publisher/all")
+      setPublishers(response.data.data || [])
+    } catch (error) {
+      console.error("Error fetching publishers:", error)
+    }
+  }
+
+  // Fetch genres
+  const fetchGenres = async () => {
+    try {
+      const response = await axios.get("https://localhost:7098/api/genre/all")
+      setGenres(response.data.data || [])
+    } catch (error) {
+      console.error("Error fetching genres:", error)
+    }
+  }
+
   useEffect(() => {
     fetchBooks()
-  }, [])
+    fetchAuthors()
+    fetchPublishers()
+    fetchGenres()
+  }, [currentPage]) // Refetch when page changes
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdown = document.querySelector('.genre-dropdown')
+      if (showGenreDropdown && dropdown && !dropdown.contains(event.target)) {
+        setShowGenreDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showGenreDropdown])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    })
+    if (name === 'genreIds') {
+      const genreId = value
+      setForm(prev => ({
+        ...prev,
+        genreIds: prev.genreIds.includes(genreId)
+          ? prev.genreIds.filter(id => id !== genreId)
+          : [...prev.genreIds, genreId]
+      }))
+    } else {
+      setForm({
+        ...form,
+        [name]: type === "checkbox" ? checked : value,
+      })
+    }
   }
 
   const handleFileChange = (e) => {
@@ -75,24 +163,30 @@ const Books = () => {
       for (const key in form) {
         if (key === "coverImageUrl" && form[key]) {
           formData.append("file", form[key])
+        } else if (key === "genreIds") {
+          form.genreIds.forEach(genreId => {
+            formData.append("genreIds", genreId)
+          })
         } else {
           formData.append(key, form[key])
         }
       }
 
-      const response = await axios.post("https://localhost:7098/api/books/add", formData, {
+      await axios.post("https://localhost:7098/api/books/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       })
 
-      setBooks([...books, response.data])
+      // Refresh the books list to get the updated data
+      await fetchBooks()
       setShowForm(false)
       resetForm()
+      showToast('Book added successfully!')
     } catch (error) {
       console.error("Error adding book:", error)
-      alert(`Error adding book: ${error.response?.data?.message || error.message}`)
+      showToast(error.response?.data?.message || 'Error adding book', 'error')
     }
   }
 
@@ -106,6 +200,10 @@ const Books = () => {
       for (const key in form) {
         if (key === "coverImageUrl" && form[key] instanceof File) {
           formData.append("file", form[key])
+        } else if (key === "genreIds") {
+          form.genreIds.forEach(genreId => {
+            formData.append("genreIds", genreId)
+          })
         } else {
           formData.append(key, form[key])
         }
@@ -118,12 +216,14 @@ const Books = () => {
         },
       })
 
-      setBooks(books.map((book) => (book.id === editingBook.id ? form : book)))
+      // Refresh the books list to get the updated data
+      await fetchBooks()
       setEditingBook(null)
       resetForm()
+      showToast('Book updated successfully!')
     } catch (error) {
       console.error("Error updating book:", error)
-      alert(`Error updating book: ${error.response?.data?.message || error.message}`)
+      showToast(error.response?.data?.message || 'Error updating book', 'error')
     }
   }
 
@@ -138,10 +238,17 @@ const Books = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      setBooks(books.filter((book) => book.id !== id))
+      await fetchBooks()
+      showToast('Book deleted successfully!')
     } catch (error) {
       console.error("Error deleting book:", error)
-      alert(`Error deleting book: ${error.response?.data?.message || error.message}`)
+      
+      // Check if it's a foreign key constraint error
+      if (error.response?.data?.errors?.innerException?.message?.includes('violates foreign key constraint')) {
+        showToast('Cannot delete this book because it has been ordered by customers. Consider marking it as unavailable instead.', 'error')
+      } else {
+        showToast(error.response?.data?.message || 'Error deleting book', 'error')
+      }
     }
   }
 
@@ -161,15 +268,28 @@ const Books = () => {
       isComingSoon: false,
       publisherId: "",
       authorId: "",
+      genreIds: [],
     })
   }
 
   const startEditing = (book) => {
+    // Find publisher ID
+    const publisher = publishers.find(p => p.name === book.publisherName)
+    
+    // Find author ID
+    const author = authors.find(a => a.name === book.authorName)
+    
+    // Find genre IDs
+    const genreIds = book.genres?.map(genreName => {
+      const genre = genres.find(g => g.name === genreName)
+      return genre?.id || ''
+    }).filter(id => id) || []
+
     setEditingBook(book)
     setForm({
       title: book.title,
       isbn: book.isbn,
-      publicationDate: book.publicationDate,
+      publicationDate: book.publicationDate?.split('T')[0],
       language: book.language,
       description: book.description,
       price: book.price,
@@ -179,8 +299,9 @@ const Books = () => {
       coverImageUrl: book.coverImageUrl,
       isAwardWinner: book.isAwardWinner,
       isComingSoon: book.isComingSoon,
-      publisherId: book.publisherId,
-      authorId: book.authorId,
+      publisherId: publisher?.id || '',
+      authorId: author?.id || '',
+      genreIds: genreIds,
     })
   }
 
@@ -225,6 +346,15 @@ const Books = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+          toast.type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        } text-white`}>
+          {toast.message}
+        </div>
+      )}
+
       <h2 className="text-3xl font-bold mb-2 text-gray-800">Manage Books</h2>
       <p className="text-gray-600 mb-6 pb-4 border-b">Add, edit, and delete books from the catalog.</p>
 
@@ -347,27 +477,101 @@ const Books = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Publisher ID</label>
-              <input
+              <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+              <select
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                placeholder="Publisher ID"
                 name="publisherId"
                 value={form.publisherId}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select a publisher</option>
+                {publishers.map((publisher) => (
+                  <option key={publisher.id} value={publisher.id}>
+                    {publisher.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Author ID</label>
-              <input
+              <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
+              <select
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                placeholder="Author ID"
                 name="authorId"
                 value={form.authorId}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select an author</option>
+                {authors.map((author) => (
+                  <option key={author.id} value={author.id}>
+                    {author.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Genres</label>
+              <div className="relative genre-dropdown">
+                <div
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all cursor-pointer"
+                  onClick={() => setShowGenreDropdown(prev => !prev)}
+                >
+                  {form.genreIds.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {form.genreIds.map(genreId => {
+                        const genre = genres.find(g => g.id === genreId)
+                        return (
+                          <span
+                            key={genreId}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
+                          >
+                            {genre?.name}
+                            <button
+                              type="button"
+                              className="ml-1 text-emerald-600 hover:text-emerald-800"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleChange({ target: { name: 'genreIds', value: genreId } })
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">Select genres</span>
+                  )}
+                </div>
+                {showGenreDropdown && (
+                  <div 
+                    className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {genres.map((genre) => (
+                      <label
+                        key={genre.id}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          name="genreIds"
+                          value={genre.id}
+                          checked={form.genreIds.includes(genre.id)}
+                          onChange={handleChange}
+                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="ml-2 text-sm text-gray-700">{genre.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="md:col-span-2">
@@ -510,6 +714,97 @@ const Books = () => {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          {paginationMetadata.totalItems > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  Showing {((paginationMetadata.currentPage - 1) * paginationMetadata.pageSize) + 1} to {Math.min(paginationMetadata.currentPage * paginationMetadata.pageSize, paginationMetadata.totalItems)} of {paginationMetadata.totalItems} books
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={!paginationMetadata.hasPrevious}
+                    className={`px-3 py-1 rounded-md ${
+                      !paginationMetadata.hasPrevious
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    disabled={!paginationMetadata.hasPrevious}
+                    className={`px-3 py-1 rounded-md ${
+                      !paginationMetadata.hasPrevious
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center space-x-1">
+                    {[...Array(paginationMetadata.totalPages)].map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show first page, last page, current page, and pages around current page
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === paginationMetadata.totalPages ||
+                        (pageNumber >= paginationMetadata.currentPage - 1 && pageNumber <= paginationMetadata.currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => setCurrentPage(pageNumber)}
+                            className={`px-3 py-1 rounded-md ${
+                              paginationMetadata.currentPage === pageNumber
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                            }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      } else if (
+                        pageNumber === paginationMetadata.currentPage - 2 ||
+                        pageNumber === paginationMetadata.currentPage + 2
+                      ) {
+                        return <span key={pageNumber} className="px-1">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    disabled={!paginationMetadata.hasNext}
+                    className={`px-3 py-1 rounded-md ${
+                      !paginationMetadata.hasNext
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(paginationMetadata.totalPages)}
+                    disabled={!paginationMetadata.hasNext}
+                    className={`px-3 py-1 rounded-md ${
+                      !paginationMetadata.hasNext
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  >
+                    Last
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
