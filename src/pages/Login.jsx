@@ -97,8 +97,8 @@ const Login = () => {
     // Check if there are any validation errors
     const hasErrors = Object.values(newValidationErrors).some(error => error !== "");
     if (hasErrors) {
-      setIsLoading(false); // Set loading to false when there are validation errors
-      return; // Don't proceed with login if there are validation errors
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -107,12 +107,39 @@ const Login = () => {
         password: formData.password,
       });
 
+      // Extract data from the response structure
       const { token, refreshToken, userId, role } = response.data.data;
+      
+      // Store user data in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("userId", userId);
       localStorage.setItem("role", role);
-      navigate("/Home", { 
+
+      // Store complete user data
+      localStorage.setItem("user", JSON.stringify(response.data.data));
+
+      // Redirect based on role
+      if (role === 'Admin') {
+        navigate("/admin/dashboard", { 
+          state: { 
+            message: "Welcome to the Admin Dashboard!", 
+            type: 'success' 
+          } 
+        });
+        return; // Add return to prevent further execution
+      } else if (role === 'Staff') {
+        navigate("/staff/orders", { 
+          state: { 
+            message: "Welcome to the Staff Portal!", 
+            type: 'success' 
+          } 
+        });
+        return; // Add return to prevent further execution
+      }
+      
+      // Default redirect for other users
+      navigate("/home", { 
         state: { 
           message: "You've successfully logged in!", 
           type: 'success' 

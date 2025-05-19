@@ -15,8 +15,8 @@ const authService = {
   login: async (credentials) => {
     try {
       const response = await axios.post(`${API_URL}/login`, credentials);
-      if (response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+      if (response.data.data.token) {
+        localStorage.setItem('user', JSON.stringify(response.data.data));
       }
       return response.data;
     } catch (error) {
@@ -26,10 +26,30 @@ const authService = {
 
   logout: () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
+    localStorage.removeItem('email');
   },
 
   getCurrentUser: () => {
-    return JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user;
+  },
+
+  isAdmin: () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.role === 'Admin';
+  },
+
+  isStaff: () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.role === 'Staff';
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('user');
   }
 };
 

@@ -11,6 +11,7 @@ import { CartProvider } from "./context/CartContext";
 
 import Navbar from "./components/Navbar";
 import PublicRoute from "./components/PublicRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Admin Pages
 import AdminLayout from "./pages/Admin/AdminLayout";
@@ -18,6 +19,10 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Books from "./pages/Admin/Books";
 import Orders from "./pages/Admin/Orders";
 import Announcements from "./pages/Admin/Announcements";
+
+// Staff Pages
+import StaffLayout from "./pages/Staff/StaffLayout";
+import StaffOrders from "./pages/Staff/StaffOrders";
 
 import Wishlist from "./pages/Wishlist";
 import BookDetails from "./pages/BookDetails";
@@ -30,7 +35,8 @@ function AppRoutes() {
 
   const hideNavbarRoutes = ['/login', '/signup'];
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname) || isAdminRoute;
+  const isStaffRoute = location.pathname.startsWith('/staff');
+  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname) || isAdminRoute || isStaffRoute;
 
   return (
     <>
@@ -50,7 +56,7 @@ function AppRoutes() {
             <SignUp />
           </PublicRoute>
         } />
-        <Route path="/cart" element={<Cart />} />s
+        <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/bookdetails/:id" element={<BookDetails />} />
         <Route path="/checkout" element={<CheckoutPage />} />
@@ -63,11 +69,24 @@ function AppRoutes() {
         </Route>
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="books" element={<Books />} />
           <Route path="orders" element={<Orders />} />
           <Route path="announcements" element={<Announcements />} />
+        </Route>
+
+        {/* Staff Routes */}
+        <Route path="/staff" element={
+          <ProtectedRoute allowedRoles={['Staff']}>
+            <StaffLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="orders" element={<StaffOrders />} />
         </Route>
       </Routes>
     </>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -13,6 +13,7 @@ import {
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -24,6 +25,23 @@ const AdminLayout = () => {
     { path: "/admin/orders", label: "Manage Orders", icon: ShoppingCart },
     { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
   ];
+
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    
+    // Redirect to login page
+    navigate('/login', {
+      state: {
+        message: "You have been successfully logged out.",
+        type: 'success'
+      }
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -72,13 +90,13 @@ const AdminLayout = () => {
 
           {/* Logout Button */}
           <div className="p-4">
-            <Link
-              to="/admin/logout"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </Link>
+            <button
+            onClick={handleLogout}
+            className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-300 hover:bg-white/10 hover:text-white "
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
           </div>
         </div>
       </aside>

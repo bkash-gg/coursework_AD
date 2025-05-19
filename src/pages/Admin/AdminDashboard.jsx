@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Book, Tag, UserCheck, ShoppingCart } from "lucide-react";
+import { Book, Tag, UserCheck, ShoppingCart, LogOut } from "lucide-react";
 import axios from "axios";
 import {
   PieChart,
@@ -15,7 +15,6 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { div } from "framer-motion/client";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444"];
 
@@ -44,18 +43,46 @@ const AdminDashboard = () => {
   ];
 
   useEffect(() => {
+    // Check if user is admin
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.role !== 'Admin') {
+      navigate('/');
+      return;
+    }
+
     const fetchStats = async () => {
       try {
-        const res = await axios.get("/api/admin/dashboard"); // Replace with your actual API
-        if (res.data.success) {
-          setStats(res.data.stats);
+        const response = await axios.get("https://localhost:7098/api/admin/dashboard", {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.data.success) {
+          setStats(response.data.stats);
         }
       } catch (error) {
         console.error("Error fetching stats", error);
       }
     };
     fetchStats();
-  }, []);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    
+    // Redirect to login page
+    navigate('/login', {
+      state: {
+        message: "You have been successfully logged out.",
+        type: 'success'
+      }
+    });
+  };
 
   const Card = ({ icon: Icon, title, value, color }) => (
     <div className="p-6 bg-white rounded-lg shadow flex justify-between items-center">
@@ -69,13 +96,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-10">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Admin Dashboard</h2>
-      <p className="text-gray-600 mb-4">
-        Overview of key metrics and statistics
-      </p>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-gray-700">Welcome, Admin!</h3>
       </div>
+
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card
