@@ -2,6 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaTrash, FaArrowLeft, FaCreditCard } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
+import axios from 'axios';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -12,8 +13,31 @@ const Cart = () => {
     clearCart,
     getTotalPrice,
     getCartCount,
-    isLoading
+    isLoading,
+    refreshCart
   } = useCart();
+
+  const handleRemoveItem = async (bookId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to remove items from cart');
+      }
+
+      await axios.delete('https://localhost:7098/api/cart/remove', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        data: {
+          bookId: bookId
+        }
+      });
+      await refreshCart();
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+      // You might want to show an error message to the user here
+    }
+  };
 
   const handleCheckout = () => {
     // Add any checkout logic here
@@ -37,17 +61,6 @@ const Cart = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-5xl mx-auto py-12 px-4">
          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <div className="w-64 h-64 mx-auto mb-6 bg-gray-100 flex items-center justify-center">
-            <img
-              src="/empty-cart.svg"
-              alt="Empty Cart"
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTAiIGhlaWdodD0iMjUwIiB2aWV3Qm94PSIwIDAgMjUwIDI1MCI+PHJlY3Qgd2lkdGg9IjI1MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzY2NiI+RW1wdHkgQ2FydDwvdGV4dD48L3N2Zz4=';
-                e.target.onerror = null; // Prevent infinite loop if this also fails
-              }}
-            />
-          </div>
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">Your cart is empty</h2>
           <p className="text-gray-500 mb-8">Looks like you haven't added any books to your cart yet.</p>
           <Link
@@ -66,7 +79,7 @@ const Cart = () => {
     <div className="min-h-screen bg-gray-50">
 
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Cart ({getCartCount()} items)</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Cart</h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
@@ -87,22 +100,17 @@ const Cart = () => {
               <div className="divide-y">
                 {cartItems.map((item) => (
                   <div key={item.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center">
-                    <img
-                      // src={item.img}
-                      // alt={item.title}
-                      className="w-24 h-24 object-contain rounded mb-4 sm:mb-0 sm:mr-6"
-                      onError={(e) => (e.target.src )}
-                    />
-
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">{item.title}</h3>
-                      <p className="text-sm text-gray-500 mb-1">by {item.author}</p>
-                      <p className="text-sm text-gray-500">{item.format}</p>
+                      <h3 className="text-left font-semibold text-gray-800">{item.title}</h3>
+                      <div className="text-gray-600 mb-2">
+                        Unit Price: ${item.price ? item.price.toFixed(2) : 'N/A'}
+                      </div>
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center border rounded">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            disabled={item.quantity <= 1}
                           >
                             -
                           </button>
@@ -114,13 +122,13 @@ const Cart = () => {
                             +
                           </button>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-4">
                           <span className="font-medium text-lg text-gray-800">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ${item.price ? (item.price * item.quantity).toFixed(2) : 'N/A'}
                           </span>
                           <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="ml-4 text-red-600 hover:text-red-800"
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="text-red-600 hover:text-red-800 p-2"
                           >
                             <FaTrash />
                           </button>
@@ -148,14 +156,6 @@ const Cart = () => {
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium">${getTotalPrice().toFixed(2)}</span>
               </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">$0.00</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600">Tax</span>
-                <span className="font-medium">$0.00</span>
-              </div>
 
               <div className="border-t my-4"></div>
 
@@ -171,9 +171,6 @@ const Cart = () => {
                 <FaCreditCard className="mr-2" /> Proceed to Checkout
               </button>
 
-              <div className="mt-4 text-xs text-gray-500 text-center">
-                Secure checkout powered by Stripe
-              </div>
             </div>
           </div>
         </div>

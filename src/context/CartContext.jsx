@@ -1,64 +1,186 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [itemCount, setItemCount] = useState(0);
 
-  // Load cart from localStorage on initial render
+  // Fetch cart from API on initial render
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-    setIsLoading(false);
+    fetchCart();
   }, []);
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
-    }
-  }, [cartItems, isLoading]);
-
-  const addToCart = (item) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
+  const fetchCart = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCartItems([]);
+        setItemCount(0);
+        return;
       }
-      return [...prevItems, { ...item, quantity: 1 }];
-    });
-  };
 
-  const removeFromCart = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
+      const response = await axios.get('https://localhost:7098/api/cart', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-  const updateQuantity = (id, quantity) => {
-    if (quantity < 1) {
-      removeFromCart(id);
-      return;
+      if (response.data.success) {
+        const mappedItems = (response.data.data.items || []).map(item => ({
+          id: item.bookId,
+          title: item.bookTitle,
+          img: item.bookCoverImageUrl,
+          price: item.unitPrice,
+          quantity: item.quantity,
+          lineTotal: item.lineTotal,
+          discountPercentage: item.discountPercentage || 0,
+          originalPrice: item.originalPrice || item.unitPrice
+        }));
+        setCartItems(mappedItems);
+        setItemCount(response.data.data.itemCount || 0);
+      } else {
+        setError(response.data.message || 'Failed to fetch cart');
+        setItemCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      setError(error.message || 'Failed to fetch cart');
+      setItemCount(0);
+    } finally {
+      setIsLoading(false);
     }
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const addToCart = async (item) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to add items to cart');
+      }
+
+      const response = await axios.post(
+        'https://localhost:7098/api/cart/add',
+        {
+          bookId: item.id,
+          quantity: item.quantity || 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        // Refresh cart after adding item
+        await fetchCart();
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Failed to add item to cart');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      throw error;
+    }
+  };
+
+  const removeFromCart = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to remove items from cart');
+      }
+
+      const response = await axios.delete('https://localhost:7098/api/cart/remove', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        data: {
+          bookId: id
+        }
+      });
+
+      if (response.data.success) {
+        await fetchCart();
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Failed to remove item from cart');
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      throw error;
+    }
+  };
+
+  const updateQuantity = async (id, quantity) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to update cart');
+      }
+
+      const response = await axios.put(
+        'https://localhost:7098/api/cart/update',
+        { 
+          bookId: id,
+          quantity: quantity 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        await fetchCart();
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Failed to update cart');
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      throw error;
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to clear cart');
+      }
+
+      const response = await axios.delete('https://localhost:7098/api/cart/clear', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        await fetchCart();
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Failed to clear cart');
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      throw error;
+    }
   };
 
   const getTotalPrice = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    return cartItems.reduce((total, item) => {
+      const discountedPrice = item.discountPercentage 
+        ? item.originalPrice * (1 - item.discountPercentage / 100)
+        : item.price;
+      return total + (discountedPrice * item.quantity);
+    }, 0);
   };
 
   const getCartCount = () => {
@@ -75,7 +197,10 @@ export const CartProvider = ({ children }) => {
         clearCart,
         getTotalPrice,
         getCartCount,
-        isLoading
+        isLoading,
+        error,
+        refreshCart: fetchCart,
+        itemCount,
       }}
     >
       {children}

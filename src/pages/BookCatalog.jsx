@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FilterPanel from '../components/FilterPanel';
 import CategoryTabs from '../components/CategoryTabs';
-import { FaHeart, FaShoppingCart } from 'react-icons/fa';
-import { useCart } from '../context/CartContext'; // Uncommented and using the cart context
+import { FaHeart, FaShoppingCart, FaStar } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
 import axios from 'axios';
 
 const CATEGORY_ENDPOINTS = {
@@ -12,11 +12,12 @@ const CATEGORY_ENDPOINTS = {
   newReleases: 'https://localhost:7098/api/books/new-releases',
   newArrivals: 'https://localhost:7098/api/books/new-arrivals',
   comingSoon: 'https://localhost:7098/api/books/coming-soon',
-  deals: 'https://localhost:7098/api/books/filter?deal=true',
+  deals: 'https://localhost:7098/api/books/deals',
 };
 
 const BookCatalog = () => {
   const [books, setBooks] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('title');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -24,28 +25,151 @@ const BookCatalog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const booksPerPage = 12;
-  const { addToCart } = useCart(); // Using the cart context
+  const { addToCart } = useCart();
+  const [filters, setFilters] = useState({
+    priceRange: [0, 100],
+    rating: 0,
+    isbn: '',
+    publicationDateRange: {
+      start: '',
+      end: new Date().toISOString().split('T')[0]
+    },
+    availability: 'all',
+    authors: [],
+    genres: [],
+    formats: [],
+    languages: [],
+    publishers: []
+  });
+
+  // Add debounce function
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  // Create debounced search function
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setSearchQuery(value);
+      setCurrentPage(1);
+    }, 500),
+    []
+  );
+
+  // Update search input handler
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    debouncedSearch(value);
+  };
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(CATEGORY_ENDPOINTS[activeCategory]);
+        
+        let url;
+        const params = {
+          page: currentPage,
+          pageSize: booksPerPage,
+          sortBy: sortBy.replace('-desc', ''),
+          ascending: !sortBy.includes('-desc'),
+        };
+  
+        if (searchQuery) {
+          url = 'https://localhost:7098/api/books/search';
+          params.searchTerm = searchQuery;
+        } else if (activeCategory === 'deals') {
+          url = CATEGORY_ENDPOINTS.deals;
+        } else if (activeCategory === 'bestsellers') {
+          url = CATEGORY_ENDPOINTS.bestsellers;
+        } else if (activeCategory === 'newReleases') {
+          url = CATEGORY_ENDPOINTS.newReleases;
+        } else {
+          url = 'https://localhost:7098/api/books/filter';
+          
+          // Add filter parameters
+          if (filters.authors.length > 0) {
+            params.authorIds = filters.authors;
+          }
+          
+          if (filters.genres.length > 0) {
+            params.genreIds = filters.genres;
+          }
+          
+          if (filters.publishers.length > 0) {
+            params.publisherIds = filters.publishers;
+          }
+          
+          if (filters.priceRange[0] > 0 || filters.priceRange[1] < 100) {
+            params.minPrice = filters.priceRange[0];
+            params.maxPrice = filters.priceRange[1];
+          }
+          
+          if (filters.languages.length > 0) {
+            params.language = filters.languages.join(',').toLowerCase();
+          }
+          
+          if (filters.formats.length > 0) {
+            params.format = filters.formats.join(',').toLowerCase();
+          }
+          
+          if (filters.availability !== 'all') {
+            params.isAvailable = filters.availability === 'inStock';
+          }
+          
+          if (activeCategory === 'awardWinners') {
+            params.isAwardWinner = true;
+          }
+          
+          if (activeCategory === 'comingSoon') {
+            params.isComingSoon = true;
+          }
+        }
+  
+        // Using axios's paramsSerializer to properly handle array parameters
+        const response = await axios.get(url, { 
+          params,
+          paramsSerializer: params => {
+            return Object.entries(params)
+              .flatMap(([key, values]) => {
+                // Handle arrays properly
+                if (Array.isArray(values)) {
+                  return values.map(value => `${key}=${value}`).join('&');
+                }
+                return `${key}=${values}`;
+              })
+              .join('&');
+          }
+        });
+        
         const booksData = response.data.data?.items || [];
+        const metadata = response.data.data?.metadata || {};
+        
         setBooks(booksData);
+        setTotalItems(metadata.totalItems || 0);
+        setTotalPages(metadata.totalPages || 1);
       } catch (error) {
         console.error('Error fetching books:', error);
         setError('Failed to load books. Please try again later.');
         setBooks([]);
+        setTotalItems(0);
+        setTotalPages(1);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchBooks();
-  }, [activeCategory]);
+  }, [activeCategory, currentPage, searchQuery, sortBy, filters]);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
@@ -62,9 +186,18 @@ const BookCatalog = () => {
         return;
       }
 
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        showNotification('User information not found. Please log in again.', 'error');
+        return;
+      }
+
       await axios.post(
         'https://localhost:7098/api/whitelist', 
-        { bookId: book.id },
+        {
+          userId: userId,
+          bookId: book.id
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,13 +208,20 @@ const BookCatalog = () => {
       showNotification(`${book.title} saved to your wishlist!`);
     } catch (error) {
       console.error('Error adding to wishlist:', error);
-      showNotification('Failed to add to wishlist.', 'error');
+      if (error.response?.data?.message === "This book is already in your whitelist.") {
+        showNotification('This book is already in your wishlist.', 'error');
+      } else if (error.response?.data?.message === "User not found.") {
+        showNotification('User not found. Please log in again.', 'error');
+      } else if (error.response?.data?.message === "Book not found.") {
+        showNotification('Book not found.', 'error');
+      } else {
+        showNotification('Failed to add to wishlist.', 'error');
+      }
     }
   };
 
   const handleAddToCart = (book) => {
     try {
-      // Using the cart context's addToCart function
       addToCart({
         id: book.id,
         title: book.title,
@@ -99,32 +239,22 @@ const BookCatalog = () => {
     }
   };
 
-  const filteredBooks = books
-    .filter((book) =>
-      book.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price':
-          return parseFloat(a.price || 0) - parseFloat(b.price || 0);
-        case 'rating':
-          return parseFloat(b.rating || 0) - parseFloat(a.rating || 0);
-        default:
-          return (a.title || '').localeCompare(b.title || '');
-      }
-    });
-
-  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
-  const paginatedBooks = filteredBooks.slice(
-    (currentPage - 1) * booksPerPage,
-    currentPage * booksPerPage
-  );
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
         <div className="flex justify-center items-center h-64">
-          <p>Loading books...</p>
+          <div className="animate-pulse flex space-x-4">
+            <div className="flex-1 space-y-6 py-1">
+              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="h-40 bg-gray-200 rounded col-span-1"></div>
+                  <div className="h-40 bg-gray-200 rounded col-span-1"></div>
+                  <div className="h-40 bg-gray-200 rounded col-span-1"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -154,112 +284,194 @@ const BookCatalog = () => {
         />
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <FilterPanel />
+          <FilterPanel 
+            filters={filters}
+            setFilters={setFilters}
+          />
 
           <div className="flex-1">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
               <input
                 type="text"
-                placeholder="Search books..."
-                className="border px-3 py-2 rounded-md w-full sm:w-1/2"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search books by title or description..."
+                className="border px-3 py-2 rounded-md w-full sm:w-1/2 focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent"
+                value={searchInput}
+                onChange={handleSearchInputChange}
               />
               <select
-                className="border px-2 py-1 rounded text-sm"
+                className="border px-3 py-2 rounded-md text-sm focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 <option value="title">Sort: Title (A-Z)</option>
                 <option value="price">Sort: Price (Low → High)</option>
+                <option value="price-desc">Sort: Price (High → Low)</option>
                 <option value="rating">Sort: Rating (High → Low)</option>
+                <option value="publication-date">Sort: Publication Date (Newest)</option>
+                <option value="popularity">Sort: Popularity (Most Sold)</option>
               </select>
             </div>
 
-            <p className="text-gray-700 mb-4">{filteredBooks.length} books found</p>
+            <p className="text-gray-700 mb-4">{totalItems} books found</p>
 
-            {filteredBooks.length === 0 ? (
+            {books.length === 0 ? (
               <div className="text-center py-12">
-                <p>No books found matching your criteria.</p>
+                <p className="text-gray-500">No books found matching your criteria.</p>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {paginatedBooks.map((book) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {books.map((book) => (
                     <div
                       key={book.id}
-                      className="group bg-white border rounded-lg shadow hover:shadow-lg transition p-4 relative overflow-hidden"
+                      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full group"
                     >
                       <div 
-                        className="cursor-pointer"
+                        className="cursor-pointer flex-grow"
                         onClick={() => {
                           window.location.href = `/bookdetails/${book.id}`;
                         }}
                       >
-                        <img
-                          src={`https://localhost:7098${book.coverImageUrl}`}
-                          alt={book.title}
-                          className="w-full h-48 object-contain mb-3"
-                          onError={(e) => {
-                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIxIDVIM2ExIDEgMCAwMC0xIDF2MTJhMSAxIDAgMDAxIDFoMThhMSAxIDAgMDAxLTFWNmExIDEgMCAwMC0xLTF6bS0xIDJ2Mkg0VjdoMTZ6bTAgNHY4SDR2LThoMTZ6IiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+';
-                          }}
-                        />
-                        <h3 className="font-semibold text-lg text-gray-800 truncate">{book.title}</h3>
-                        <p className="text-sm text-gray-500 mb-1">by {book.authorName}</p>
-                        <p className="text-xs text-gray-500 mb-1">{book.format} - {book.publisherName}</p>
-                        <p className="text-xs text-gray-500 mb-1">Language: {book.language}</p>
-                        <div className="mb-2">
-                          <span className="text-lg font-bold text-[#0F4C81]">${book.price}</span>
+                        <div className="relative pb-[120%] bg-gray-100 group-hover:bg-gray-50 transition-colors duration-300">
+                          {/* Badges Row */}
+                          <div className="absolute top-2 left-2 right-2 flex justify-between z-10">
+                            {book.isAwardWinner && (
+                              <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-2 whitespace-nowrap">
+                                Award Winner
+                              </div>
+                            )}
+                            {book.discountPercentage > 0 && (
+                              <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold ml-auto whitespace-nowrap">
+                                {book.discountPercentage}% OFF
+                              </div>
+                            )}
+                          </div>
+                          <img
+                            src={`https://localhost:7098${book.coverImageUrl || '/images/default-book.jpg'}`}
+                            alt={book.title}
+                            className="absolute h-full w-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIxIDVIM2ExIDEgMCAwMC0xIDF2MTJhMSAxIDAgMDAxIDFoMThhMSAxIDAgMDAxLTFWNmExIDEgMCAwMC0xLTF6bS0xIDJ2Mkg0VjdoMTZ6bTAgNHY4SDR2LThoMTZ6IiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+';
+                            }}
+                          />
+                        </div>
+                        <div className="p-4 flex-grow">
+                          <h3 className="font-semibold text-lg text-gray-800 mb-1 line-clamp-2 h-14 group-hover:text-[#0F4C81] transition-colors duration-300">
+                            {book.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-2">by {book.authorName || 'Unknown Author'}</p>
+                          
+                          <div className="mt-2 flex items-center gap-2">
+                            {book.discountPercentage > 0 ? (
+                              <>
+                                <span className="text-lg font-bold text-[#0F4C81]">
+                                  ${(book.price * (1 - book.discountPercentage / 100)).toFixed(2)}
+                                </span>
+                                <span className="text-sm text-gray-500 line-through">
+                                  ${book.price.toFixed(2)}
+                                </span>
+                                <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
+                                  Save ${(book.price * (book.discountPercentage / 100)).toFixed(2)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-lg font-bold text-[#0F4C81]">
+                                ${book.price?.toFixed(2) || '0.00'}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="mt-3 text-xs text-gray-500 space-y-1">
+                            <p className="truncate flex items-center gap-1">
+                              <span className="font-medium">Format:</span> 
+                              <span className="bg-gray-100 px-2 py-0.5 rounded-full">{book.format || 'Paperback'}</span>
+                            </p>
+                            <p className="truncate flex items-center gap-1">
+                              <span className="font-medium">Publisher:</span> 
+                              <span className="bg-gray-100 px-2 py-0.5 rounded-full">{book.publisherName || 'Unknown Publisher'}</span>
+                            </p>
+                            <p className="flex items-center gap-1">
+                              <span className="font-medium">Language:</span> 
+                              <span className="bg-gray-100 px-2 py-0.5 rounded-full">{book.language || 'English'}</span>
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex justify-between items-center mt-2">
-                        <button 
-                          className="flex items-center gap-1 border px-3 py-1 rounded hover:bg-gray-100 text-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToWishlist(book);
-                          }}
-                        >
-                          <FaHeart /> Save
-                        </button>
-                        <button
-                          className={`flex items-center gap-1 px-3 py-1 rounded text-sm text-white ${
-                            book.isAvailable
-                              ? 'bg-[#0F4C81] hover:bg-[#0d3e6a]'
-                              : 'bg-gray-400 cursor-not-allowed'
-                          }`}
-                          disabled={!book.isAvailable}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (book.isAvailable) {
-                              handleAddToCart(book);
-                            }
-                          }}
-                        >
-                          <FaShoppingCart /> Add
-                        </button>
+                      <div className="p-4 border-t border-gray-100">
+                        <div className="flex justify-between items-center">
+                          <button 
+                            className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-red-50 text-sm text-gray-700 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToWishlist(book);
+                            }}
+                          >
+                            <FaHeart className="text-red-500" /> 
+                            <span>Save</span>
+                          </button>
+                          <button
+                            className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm text-white transition-colors ${
+                              book.isAvailable
+                                ? 'bg-[#0F4C81] hover:bg-[#0d3e6a]'
+                                : 'bg-gray-400 cursor-not-allowed'
+                            }`}
+                            disabled={!book.isAvailable}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (book.isAvailable) {
+                                handleAddToCart(book);
+                              }
+                            }}
+                          >
+                            <FaShoppingCart /> 
+                            <span>Add to Cart</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* Pagination */}
-                <div className="flex justify-between items-center mt-6">
+                <div className="flex justify-between items-center mt-8">
                   <button
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className="text-sm px-3 py-1 border rounded disabled:opacity-50"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      currentPage === 1 
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                        : 'bg-[#0F4C81] text-white hover:bg-[#0d3e6a]'
+                    }`}
                   >
                     Previous
                   </button>
-                  <span className="text-sm">
-                    Page {currentPage} of {totalPages}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-md text-sm font-medium ${
+                          currentPage === page 
+                            ? 'bg-[#0F4C81] text-white' 
+                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
                   <button
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    className="text-sm px-3 py-1 border rounded disabled:opacity-50"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      currentPage === totalPages 
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                        : 'bg-[#0F4C81] text-white hover:bg-[#0d3e6a]'
+                    }`}
                   >
                     Next
                   </button>

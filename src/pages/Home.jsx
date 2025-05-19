@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Footer from "../components/footer";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   FaCamera,
   FaUtensils,
@@ -13,8 +13,32 @@ import {
 } from "react-icons/fa";
 
 const Home = () => {
+  const location = useLocation();
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.message && location.state?.type === 'success') {
+      setSuccessMessage(location.state.message);
+      // Clear the location state to prevent showing message on refresh
+      window.history.replaceState({}, document.title);
+      
+      // Clear success message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
+
   return (
     <div className="font-sans text-gray-800 bg-gray-50 w-full overflow-x-hidden">
+      {/* Success message display */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 p-4 bg-green-100 text-green-700 rounded-lg shadow-lg animate-fade-in">
+          {successMessage}
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section
         className="relative py-20 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] w-full"
@@ -229,12 +253,6 @@ const Home = () => {
     </div>
   </div>
 </section>
-
-
-
-
-
-
       <Footer />
     </div>
   );

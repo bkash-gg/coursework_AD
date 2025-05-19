@@ -1,18 +1,22 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   MdMail,
   MdLock,
   MdPerson,
   MdOutlineVisibility,
   MdOutlineVisibilityOff,
+  MdHome
 } from "react-icons/md";
 import Button from "../components/Button";
 import axios from "axios";
 
 const Login = () => {
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     email: "",
     password: "",
@@ -45,9 +49,29 @@ const Login = () => {
     }));
   };
 
+  // Set success message only when coming from registration
+  useEffect(() => {
+    if (location.state?.message && location.state?.type === 'success') {
+      setSuccessMessage(location.state.message);
+      // Clear the location state to prevent showing message on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  // Clear success message after 5 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     // Reset validation errors
     const newValidationErrors = {
@@ -73,6 +97,7 @@ const Login = () => {
     // Check if there are any validation errors
     const hasErrors = Object.values(newValidationErrors).some(error => error !== "");
     if (hasErrors) {
+      setIsLoading(false); // Set loading to false when there are validation errors
       return; // Don't proceed with login if there are validation errors
     }
 
@@ -87,15 +112,35 @@ const Login = () => {
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("userId", userId);
       localStorage.setItem("role", role);
-      navigate("/Home");
+      navigate("/Home", { 
+        state: { 
+          message: "You've successfully logged in!", 
+          type: 'success' 
+        } 
+      });
     } catch (err) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const goToHome = () => {
+    navigate("/Home");
+  };
+
   return (
-    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <div className="flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen relative">
+      {/* Home button - positioned absolutely in the top left */}
+      <button 
+        onClick={goToHome}
+        className="absolute top-4 left-4 z-50 bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+        aria-label="Go to home page"
+      >
+        <MdHome className="h-6 w-6 text-[#3B6CF7] group-hover:text-[#4A7CFA]" />
+      </button>
+
       {/* Left column - Enhanced background */}
       <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
@@ -120,13 +165,20 @@ const Login = () => {
       <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
               Log In To Your Account
             </h1>
             <p className="text-gray-500 mt-1">
               Please enter your credentials to continue
             </p>
           </div>
+
+          {/* Success message display */}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg animate-fade-in">
+              {successMessage}
+            </div>
+          )}
 
           {/* Error message display */}
           {error && (
@@ -155,10 +207,10 @@ const Login = () => {
                 Email Address
               </label>
               <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
-              {validationErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
-              )}
             </div>
+            {validationErrors.email && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.email}</p>
+            )}
 
             {/* Password input with enhanced interactions */}
             <div className="group relative">
@@ -180,7 +232,7 @@ const Login = () => {
               </label>
               <MdLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
               <button
-                type="button"
+                type="button"s
                 onClick={togglePasswordVisibility}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3B6CF7] transition-colors duration-300"
               >
@@ -190,16 +242,24 @@ const Login = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
-              {validationErrors.password && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
-              )}
             </div>
+            {validationErrors.password && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.password}</p>
+            )}
 
             <Button
               type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30"
+              disabled={isLoading}
+              className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed relative"
             >
-              Sign In
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Signing In...
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
 

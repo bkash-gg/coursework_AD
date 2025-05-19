@@ -6,65 +6,86 @@ const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [sortBy, setSortBy] = useState('default');
   const [showNotification, setShowNotification] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Fetch wishlist items
   useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Please login to view your wishlist');
+          return;
+        }
 
-    axios.get('https://localhost:7098/api/whitelist')
-      .then((response) => {
-        setWishlistItems(response.data);
-      })
-      .catch((error) => {
+        const response = await axios.get('https://localhost:7098/api/whitelist', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          setWishlistItems(response.data.data);
+        } else {
+          setError(response.data.message || 'Failed to fetch wishlist items');
+        }
+      } catch (error) {
         console.error('Error fetching wishlist items:', error);
-      });
+        setError('Failed to load wishlist items. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishlist();
   }, []);
 
-  const removeFromWishlist = (id) => {
-    axios.delete(`https://localhost:7098/api/whitelist/${id}`)
-      .then(() => {
-        setWishlistItems((prevItems) => prevItems.filter(item => item.id !== id));
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000);
-      })
-      .catch((error) => {
-        console.error('Error removing item from wishlist:', error);
+  const removeFromWishlist = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setShowNotification('Please login to manage your wishlist');
+        return;
+      }
+
+      await axios.delete(`https://localhost:7098/api/whitelist/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
+
+      setWishlistItems((prevItems) => prevItems.filter(item => item.id !== id));
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+    } catch (error) {
+      console.error('Error removing item from wishlist:', error);
+      setShowNotification('Failed to remove item from wishlist');
+    }
   };
 
-  const sortedItems = [...wishlistItems].sort((a, b) => {
-    if (sortBy === 'price-asc') return a.price - b.price;
-    if (sortBy === 'price-desc') return b.price - a.price;
-    if (sortBy === 'title') return a.title.localeCompare(b.title);
-    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-    return 0;
-  });
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F4C81]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Your Wishlist</h1>
-            <p className="text-gray-600 mt-2">
-              {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'}
-            </p>
-          </div>
-
-          <div className="mt-4 md:mt-0">
-            <select
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="default">Sort by: Default</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="title">Title</option>
-              <option value="rating">Rating</option>
-            </select>
-          </div>
-        </div>
-
         {wishlistItems.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,7 +98,7 @@ const Wishlist = () => {
         ) : (
           <AnimatePresence>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedItems.map((item) => (
+              {wishlistItems.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -88,8 +109,8 @@ const Wishlist = () => {
                 >
                   <div className="relative">
                     <img
-                      src={`https://localhost:7098${item.imageUrl}`}
-                      alt={item.title}
+                      src={`https://localhost:7098${item.bookImageURL}`}
+                      alt={item.bookTitle}
                       className="w-full h-64 object-contain bg-gray-100"
                     />
                     <div
@@ -107,10 +128,23 @@ const Wishlist = () => {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-600 mb-1">by {item.author}</p>
-                    <p className="text-sm text-gray-500">Rating: {item.rating || 0}/5</p>
-                    <p className="text-md text-[#0F4C81] font-bold mt-2">${item.price}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.bookTitle}</h3>
+                    <p className="text-sm text-gray-600 mb-1">by {item.authorName}</p>
+                    <p className="text-sm text-gray-500 mb-3">Added on {new Date(item.addedOn).toLocaleDateString()}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => window.location.href = `/bookdetails/${item.bookId}`}
+                        className="flex-1 bg-[#0F4C81] text-white px-4 py-2 rounded-md hover:bg-[#0d3e6a] transition-colors duration-300"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => removeFromWishlist(item.id)}
+                        className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}

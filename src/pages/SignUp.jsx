@@ -1,23 +1,23 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MdMail,
   MdLock,
   MdPerson,
   MdOutlineVisibility,
   MdOutlineVisibilityOff,
+  MdHome
 } from "react-icons/md";
 import Button from "../components/Button";
-// import authService from "../services/authService";
 import axios from "axios";
 
 const SignUp = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [passwordValid, setPasswordValid] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  // const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     email: "",
     username: "",
@@ -33,7 +33,7 @@ const SignUp = () => {
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(email) && email.length <= 100;
   };
 
   const validateUsername = (username) => {
@@ -41,7 +41,7 @@ const SignUp = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -57,7 +57,7 @@ const SignUp = () => {
       if (!validateEmail(value)) {
         setValidationErrors((prev) => ({
           ...prev,
-          email: "Please enter a valid email address",
+          email: value.length > 100 ? "Email cannot exceed 100 characters" : "Please enter a valid email address",
         }));
       }
     }
@@ -107,6 +107,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     // Reset all validation errors
     const newValidationErrors = {
@@ -136,7 +137,7 @@ const SignUp = () => {
     }
 
     if (!formData.confirmPassword) {
-      newValidationErrors.confirmPassword = "Please confirm your password";
+      newValidationErrors.confirmPassword = "Confirm Password is required";
     } else if (formData.password !== formData.confirmPassword) {
       newValidationErrors.confirmPassword = "Passwords do not match";
     }
@@ -147,6 +148,7 @@ const SignUp = () => {
     // Check if there are any validation errors
     const hasErrors = Object.values(newValidationErrors).some(error => error !== "");
     if (hasErrors) {
+      setIsLoading(false);
       return; // Don't proceed with form submission if there are errors
     }
 
@@ -162,6 +164,12 @@ const SignUp = () => {
         }
       );
       console.log(response.data);
+      navigate("/login", { 
+        state: { 
+          message: "Registration successful! Please login with your credentials.",
+          type: "success"
+        }
+      });
     } catch (error) {
       console.error("Full error:", error);
       if (error.response) {
@@ -169,6 +177,8 @@ const SignUp = () => {
       } else {
         setError("Cannot connect to server. Is the backend running?");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -180,8 +190,21 @@ const SignUp = () => {
     setShowConfirmPassword((prev) => !prev);
   };
 
+  const goToHome = () => {
+    navigate("/Home");
+  };
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 to-indigo-50 relative">
+      {/* Home button - positioned absolutely in the top left */}
+      <button 
+        onClick={goToHome}
+        className="absolute top-4 left-4 z-50 bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+        aria-label="Go to home page"
+      >
+        <MdHome className="h-6 w-6 text-[#3B6CF7] group-hover:text-[#4A7CFA]" />
+      </button>
+
       {/* Left column - Enhanced background */}
       <div className="hidden min-h-screen md:flex md:w-2/3 bg-gradient-to-br from-[#3B6CF7] to-[#4A7CFA] flex-col justify-center items-center text-white p-10 relative overflow-hidden">
         {/* Animated decorative elements */}
@@ -206,8 +229,8 @@ const SignUp = () => {
       <div className="flex flex-grow min-h-screen bg-white/90 backdrop-blur-lg md:w-1/2 items-center justify-center shadow-xl rounded-l-2xl overflow-hidden">
         <div className="w-full max-w-md px-6 py-10 sm:px-8 md:px-12">
           <div className="mb-12 text-center animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
-              Sign Up for BookWorm
+            <h1 className="text-2xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] bg-clip-text text-transparent">
+              Sign Up for Quill and Byte
             </h1>
             <p className="text-gray-500 mt-1">
               Create your account to get started
@@ -220,7 +243,7 @@ const SignUp = () => {
             onSubmit={handleSubmit}
           >
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+              <div className="text-left p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -245,10 +268,10 @@ const SignUp = () => {
                 Email Address
               </label>
               <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
-              {validationErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
-              )}
             </div>
+            {validationErrors.email && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.email}</p>
+            )}
 
             {/* Username Input */}
             <div className="group relative">
@@ -270,10 +293,10 @@ const SignUp = () => {
                 Username
               </label>
               <MdPerson className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-6 w-6 transition-colors duration-300 peer-focus:text-[#3B6CF7]" />
-              {validationErrors.username && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.username}</p>
-              )}
             </div>
+            {validationErrors.username && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.username}</p>
+            )}
 
             {/* Password Input */}
             <div className="group relative">
@@ -306,10 +329,10 @@ const SignUp = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
-              {validationErrors.password && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
-              )}
             </div>
+            {validationErrors.password && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.password}</p>
+            )}
 
             {/* Confirm Password Input */}
             <div className="group relative">
@@ -342,17 +365,24 @@ const SignUp = () => {
                   <MdOutlineVisibility className="h-6 w-6" />
                 )}
               </button>
-              {validationErrors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.confirmPassword}</p>
-              )}
             </div>
+            {validationErrors.confirmPassword && (
+              <p className="text-left text-red-500 text-sm mt-1">{validationErrors.confirmPassword}</p>
+            )}
 
             <Button
               type="submit"
-             
+              disabled={isLoading}
               className="w-full py-3.5 bg-gradient-to-r from-[#3B6CF7] to-[#4A7CFA] text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-[#3B6CF7]/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            >Sign Up
-              
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Signing Up...
+                </div>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
 
