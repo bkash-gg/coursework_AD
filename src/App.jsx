@@ -76,6 +76,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }>
           <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="books" element={<Books />} />
           <Route path="discounts" element={<Discounts />} />
           <Route path="orders" element={<Orders />} />

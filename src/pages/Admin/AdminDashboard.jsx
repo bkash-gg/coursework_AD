@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Book, Tag, UserCheck, ShoppingCart, LogOut } from "lucide-react";
+import { Book, Tag, ShoppingCart, LogOut } from "lucide-react";
 import axios from "axios";
 import {
   PieChart,
@@ -22,9 +22,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalBooks: 0,
-    totalMembers: 0,
-    totalOrders: 0,
     booksOnSale: 0,
+    totalOrders: 0,
   });
 
   const categoryData = [
@@ -52,13 +51,33 @@ const AdminDashboard = () => {
 
     const fetchStats = async () => {
       try {
-        const response = await axios.get("https://localhost:7098/api/admin/dashboard", {
+        // Fetch books
+        const booksResponse = await axios.get("https://localhost:7098/api/books/all?page=1&pageSize=10", {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
-        if (response.data.success) {
-          setStats(response.data.stats);
+
+        // Fetch discounts
+        const discountsResponse = await axios.get("https://localhost:7098/api/discounts", {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        // Fetch orders
+        const ordersResponse = await axios.get("https://localhost:7098/api/Order/all", {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (booksResponse.data.success && discountsResponse.data.success && ordersResponse.data.success) {
+          setStats({
+            totalBooks: booksResponse.data.data.metadata.totalItems,
+            booksOnSale: discountsResponse.data.data.length,
+            totalOrders: ordersResponse.data.data
+          });
         }
       } catch (error) {
         console.error("Error fetching stats", error);
@@ -101,7 +120,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           icon={Book}
           title="Total Books"
@@ -113,12 +132,6 @@ const AdminDashboard = () => {
           title="Books On Sale"
           value={stats.booksOnSale}
           color="text-green-500"
-        />
-        <Card
-          icon={UserCheck}
-          title="Total Members"
-          value={stats.totalMembers}
-          color="text-indigo-500"
         />
         <Card
           icon={ShoppingCart}
