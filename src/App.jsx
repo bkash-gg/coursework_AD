@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import BookCatalog from "./pages/BookCatalog";
 import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
+import UserAnnouncements from "./pages/Announcements";
 
 import Navbar from "./components/Navbar";
 import PublicRoute from "./components/PublicRoute";
@@ -61,6 +62,7 @@ function AppRoutes() {
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/bookdetails/:id" element={<BookDetails />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/announcements" element={<UserAnnouncements />} />
 
         {/* Profile Routes */}
         <Route path="/profile" element={<Profile />}>

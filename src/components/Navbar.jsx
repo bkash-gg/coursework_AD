@@ -75,6 +75,14 @@ const Navbar = () => {
               Wishlist
             </Link>
           </li>
+          <li>
+            <Link
+              to="/announcements"
+              className="hover:text-red-600 text-lg font-medium transition-colors duration-300"
+            >
+              Announcements
+            </Link>
+          </li>
         </ul>
 
         {/* Mobile and Desktop Cart, Login, and Signup Buttons */}

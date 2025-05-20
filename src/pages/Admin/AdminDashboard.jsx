@@ -150,10 +150,10 @@ const AdminDashboard = () => {
           Manage Books
         </button>
         <button
-          onClick={() => navigate("/admin/orders")}
+          onClick={() => navigate("/admin/discounts")}
           className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg shadow"
         >
-          Manage Orders
+          Manage Discounts
         </button>
         <button
           onClick={() => navigate("/admin/announcements")}
