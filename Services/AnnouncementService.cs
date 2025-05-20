@@ -61,11 +61,6 @@ namespace AD_Coursework.Services
 
         public async Task<AnnouncementDto> CreateAnnouncementAsync(AnnouncementCreateDto createDto)
         {
-            if (!Enum.TryParse(createDto.Type, true, out AnnouncementType type))
-            {
-                throw new ArgumentException($"Invalid announcement type: {createDto.Type}");
-            }
-
             var announcement = new Announcement
             {
                 Title = createDto.Title,
@@ -73,7 +68,7 @@ namespace AD_Coursework.Services
                 StartDate = createDto.StartDate,
                 EndDate = createDto.EndDate,
                 CreatedAt = DateTime.UtcNow,  
-                Type = type
+                Type = createDto.Type
             };
 
             announcement = await _announcementRepository.AddAsync(announcement);
@@ -96,17 +91,12 @@ namespace AD_Coursework.Services
             var existingAnnouncement = await _announcementRepository.GetByIdAsync(id);
             if (existingAnnouncement == null) return null;
 
-            if (!Enum.TryParse(updateDto.Type, true, out AnnouncementType type))
-            {
-                throw new ArgumentException($"Invalid announcement type: {updateDto.Type}");
-            }
-
             existingAnnouncement.Title = updateDto.Title;
             existingAnnouncement.Message = updateDto.Message;
             existingAnnouncement.StartDate = updateDto.StartDate;
             existingAnnouncement.EndDate = updateDto.EndDate;
             existingAnnouncement.IsActive = updateDto.IsActive;
-            existingAnnouncement.Type = type;
+            existingAnnouncement.Type = updateDto.Type;
 
             existingAnnouncement = await _announcementRepository.UpdateAsync(existingAnnouncement);
 
@@ -131,23 +121,6 @@ namespace AD_Coursework.Services
         public async Task<IEnumerable<AnnouncementDto>> GetActiveAnnouncementsAsync()
         {
             var announcements = await _announcementRepository.GetActiveAnnouncementsAsync();
-
-            return announcements.Select(a => new AnnouncementDto
-            {
-                Id = a.Id,
-                Title = a.Title,
-                Message = a.Message,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
-                CreatedAt = a.CreatedAt,
-                IsActive = a.IsActive,
-                Type = a.Type.ToString()
-            });
-        }
-
-        public async Task<IEnumerable<AnnouncementDto>> GetByTypeAsync(AnnouncementType type)
-        {
-            var announcements = await _announcementRepository.GetByTypeAsync(type);
 
             return announcements.Select(a => new AnnouncementDto
             {

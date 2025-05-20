@@ -5,7 +5,7 @@ namespace AD_Coursework.Interfaces.Services
     public interface IBookService
     {
         Task<(IEnumerable<BookDto> Books, int TotalCount)> GetAllAsync(int page, int pageSize);
-        Task<BookDto?> GetByIdAsync(Guid id);
+        Task<BookDto?> GetByIdAsync(Guid id, Guid userId);
         Task<bool> CreateAsync(BookCreateDto bookCreateDto);
         Task<bool> UpdateAsync(Guid id, BookUpdateDto bookUpdateDto);
         Task<bool> DeleteAsync(Guid id);

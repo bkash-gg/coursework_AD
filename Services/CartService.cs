@@ -54,14 +54,20 @@ namespace AD_Coursework.Services
             }
             else
             {
+                var activeDiscount = book.Discounts.FirstOrDefault(d => d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow);
+
+                var discountedPrice = activeDiscount != null
+                    ? book.Price - (book.Price * (decimal)activeDiscount.DiscountPercentage / 100)
+                    : book.Price;
+
                 var newItem = new CartItem
                 {
                     CartId = cart.Id,
-                    Cart = cart, 
+                    Cart = cart,
                     BookId = addToCartDto.BookId,
-                    Book = book, 
+                    Book = book,
                     Quantity = addToCartDto.Quantity,
-                    UnitPrice = book.Price
+                    UnitPrice = discountedPrice
                 };
                 await _cartRepository.AddCartItemAsync(newItem);
             }

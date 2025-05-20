@@ -15,8 +15,5 @@ namespace AD_Coursework.DTOs.Order
 
         [StringLength(50, ErrorMessage = "Payment method cannot exceed 50 characters.")]
         public string PaymentMethod { get; set; } = "In-Store";
-
-        [Required(ErrorMessage = "At least one order item is required.")]
-        public List<OrderItemCreateDto> OrderItems { get; set; } = new List<OrderItemCreateDto>();
     }
 }

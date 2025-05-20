@@ -1,4 +1,6 @@
-﻿namespace AD_Coursework.DTOs.Book
+﻿using AD_Coursework.DTOs.Review;
+
+namespace AD_Coursework.DTOs.Book
 {
     public class BookDto
     {
@@ -20,5 +22,7 @@
         public List<string> Genres { get; set; } = new(); 
         public float DiscountPercentage { get; set; }
         public DateTime CreatedAt { get; set; }
+        public List<ReviewDto> Reviews { get; set; } = new();
+        public bool IsPurchasedByUser { get; set; }
     }
 }

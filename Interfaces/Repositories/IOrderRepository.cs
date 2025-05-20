@@ -1,4 +1,5 @@
-﻿using AD_Coursework.Models;
+﻿using AD_Coursework.DTOs.Checkout;
+using AD_Coursework.Models;
 
 namespace AD_Coursework.Interfaces.Repositories
 {
@@ -12,5 +13,8 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<int> GetSuccessfulOrderCountAsync(Guid userId);
         Task<OrderItem> AddOrderItemAsync(OrderItem orderItem);
         Task<IEnumerable<OrderItem>> GetOrderItemsAsync(Guid orderId);
+        Task<CheckoutSummaryDto> GetCheckoutSummaryAsync(Guid userId);
+        Task<int> GetCompletedOrderCountAsync();
+        Task<IEnumerable<Order>> GetAllOrdersAsync();
     }
 }

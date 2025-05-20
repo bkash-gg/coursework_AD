@@ -2,13 +2,6 @@
 
 namespace AD_Coursework.Models
 {
-    public enum AnnouncementType
-    {
-        Deal,         
-        NewArrival,  
-        Information
-    }
-
     public class Announcement : IValidatableObject
     {
         [Key]
@@ -33,7 +26,7 @@ namespace AD_Coursework.Models
         public bool IsActive { get; set; } = true;
 
         [Required]
-        public AnnouncementType Type { get; set; }
+        public string Type { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {

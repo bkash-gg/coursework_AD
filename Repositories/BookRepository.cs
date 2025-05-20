@@ -35,6 +35,9 @@ namespace AD_Coursework.Repositories
                 .Include(b => b.Publisher)
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
+                .Include(b => b.Discounts)
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.User) 
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
@@ -260,15 +263,17 @@ namespace AD_Coursework.Repositories
 
         public async Task<IEnumerable<Book>> SearchBooksAsync(string searchTerm, int page, int pageSize)
         {
+            searchTerm = searchTerm?.ToLower() ?? string.Empty;
+
             return await _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
                 .Include(b => b.BookGenres)
                     .ThenInclude(bg => bg.Genre)
                 .Where(b =>
-                    b.Title.Contains(searchTerm) ||
-                    b.ISBN.Contains(searchTerm) ||
-                    b.Description.Contains(searchTerm))
+                    b.Title.ToLower().Contains(searchTerm) ||
+                    b.ISBN.ToLower().Contains(searchTerm) ||
+                    b.Description.ToLower().Contains(searchTerm))
                 .OrderBy(b => b.Title)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -311,10 +316,11 @@ namespace AD_Coursework.Repositories
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
+                var loweredSearchTerm = searchTerm.ToLower();
                 query = query.Where(b =>
-                    b.Title.Contains(searchTerm) ||
-                    b.ISBN.Contains(searchTerm) ||
-                    b.Description.Contains(searchTerm));
+                    b.Title.ToLower().Contains(loweredSearchTerm) ||
+                    b.ISBN.ToLower().Contains(loweredSearchTerm) ||
+                    b.Description.ToLower().Contains(loweredSearchTerm));
             }
 
             if (authorIds != null && authorIds.Any())
@@ -344,12 +350,14 @@ namespace AD_Coursework.Repositories
 
             if (!string.IsNullOrWhiteSpace(language))
             {
-                query = query.Where(b => b.Language == language);
+                var loweredLanguage = language.ToLower();
+                query = query.Where(b => b.Language.ToLower() == loweredLanguage);
             }
 
             if (!string.IsNullOrWhiteSpace(format))
             {
-                query = query.Where(b => b.Format == format);
+                var loweredFormat = format.ToLower();
+                query = query.Where(b => b.Format.ToLower() == loweredFormat);
             }
 
             if (isAvailable.HasValue)
@@ -381,13 +389,14 @@ namespace AD_Coursework.Repositories
                             ? query.OrderBy(b => b.Price)
                             : query.OrderByDescending(b => b.Price);
                         break;
-                    case "date":
+                    case "publication-date":
                     case "publicationdate":
                         query = ascending
                             ? query.OrderBy(b => b.PublicationDate)
                             : query.OrderByDescending(b => b.PublicationDate);
                         break;
                     case "popularity":
+                        query = query.Include(b => b.OrderItems); 
                         query = ascending
                             ? query.OrderBy(b => b.OrderItems.Count)
                             : query.OrderByDescending(b => b.OrderItems.Count);

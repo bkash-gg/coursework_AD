@@ -30,7 +30,10 @@ namespace AD_Coursework.Services
                 Id = item.Id,
                 UserId = item.UserId,
                 BookId = item.BookId,
-                AddedOn = item.AddedOn
+                AddedOn = item.AddedOn,
+                BookTitle = item.Book?.Title,
+                BookImageURL = item.Book?.CoverImageUrl,
+                AuthorName = item.Book?.Author?.Name
             });
 
             return result;

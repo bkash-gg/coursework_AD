@@ -78,7 +78,8 @@ namespace AD_Coursework.Controllers
                     token = result.AuthResponse.Token,
                     refreshToken = result.AuthResponse.RefreshToken,
                     userId = result.AuthResponse.UserId,
-                    role = result.AuthResponse.Role
+                    role = result.AuthResponse.Role,
+                    email = result.AuthResponse.Email
                 };
 
                 return Success(flattenedResponse, "You’ve successfully logged in.");

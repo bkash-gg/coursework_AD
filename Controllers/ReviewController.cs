@@ -50,7 +50,7 @@ namespace AD_Coursework.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("add")]
         [Authorize(Roles = "Member")]
         public async Task<IActionResult> Create([FromBody] ReviewCreateDto reviewCreateDto)
         {
@@ -86,6 +86,7 @@ namespace AD_Coursework.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                // This will catch the "User must purchase the book before reviewing" exception
                 return Error(ex.Message, StatusCodes.Status403Forbidden);
             }
             catch (Exception ex)
@@ -95,7 +96,7 @@ namespace AD_Coursework.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Members")]
+        [Authorize(Roles = "Member")]
         public async Task<IActionResult> Update(Guid id, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
             try

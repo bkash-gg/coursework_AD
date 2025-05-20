@@ -40,21 +40,9 @@ namespace AD_Coursework.Models
         [Required]
         [StringLength(30)]
         public string ClaimCode { get; set; } = string.Empty;
-        
-        [StringLength(200)]
-        public string PickupNotes { get; set; } = string.Empty;
-        
-        public DateTime? PickupDate { get; set; }
-        
-        [StringLength(50)]
-        public string PaymentMethod { get; set; } = "In-Store";
 
         public DateTime? CancellationDate { get; set; }
         
-        public string? CancellationReason { get; set; }
-        
-        public DateTime? CompletionDate { get; set; }
-
         [Required]
         [ForeignKey("User")]
         public Guid UserId { get; set; }

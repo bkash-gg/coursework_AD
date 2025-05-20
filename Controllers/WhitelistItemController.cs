@@ -2,6 +2,7 @@
 using AD_Coursework.Interfaces.Services;
 using AD_Coursework.DTOs.WhitelistItem;
 using Microsoft.AspNetCore.Mvc;
+using AD_Coursework.Extensions;
 
 namespace AD_Coursework.Controllers
 {
@@ -18,35 +19,18 @@ namespace AD_Coursework.Controllers
             _whitelistItemService = whitelistItemService;
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetWhitelistItemsByUserId(Guid userId)
+        [HttpGet]
+        public async Task<IActionResult> GetWhitelistItemsByUserId()
         {
             try
             {
+                var userId = User.GetUserId();
                 var whitelistItems = await _whitelistItemService.GetWhitelistItemsByUserIdAsync(userId);
                 return Success(whitelistItems, "Whitelist items retrieved successfully.");
             }
             catch (Exception ex)
             {
                 return HandleException(ex, "Failed to retrieve whitelist items");
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetWhitelistItemById(Guid id)
-        {
-            try
-            {
-                var whitelistItem = await _whitelistItemService.GetWhitelistItemByIdAsync(id);
-                if (whitelistItem == null)
-                {
-                    return Error("Whitelist item not found.", StatusCodes.Status404NotFound);
-                }
-                return Success(whitelistItem, "Whitelist item retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, "Failed to retrieve whitelist item");
             }
         }
 

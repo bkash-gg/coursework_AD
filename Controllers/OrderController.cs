@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AD_Coursework.Interfaces.Services;
-using AD_Coursework.DTOs.Order;
 using AD_Coursework.Extensions;
 
 namespace AD_Coursework.Controllers
 {
     [Route("api/orders")]
     [ApiController]
-    [Authorize]
     public class OrderController : BaseController
     {
         private readonly IOrderService _orderService;
@@ -21,7 +19,7 @@ namespace AD_Coursework.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Member")]
-        public async Task<IActionResult> PlaceOrder([FromBody] OrderCreateDto orderCreateDto)
+        public async Task<IActionResult> PlaceOrder()
         {
             try
             {
@@ -31,7 +29,7 @@ namespace AD_Coursework.Controllers
                 }
 
                 var userId = User.GetUserId();
-                var order = await _orderService.PlaceOrderAsync(userId, orderCreateDto);
+                var order = await _orderService.PlaceOrderAsync(userId);
                 return Success(order, "Your order has been placed successfully.");
             }
             catch (InvalidOperationException ex)
@@ -47,6 +45,7 @@ namespace AD_Coursework.Controllers
         }
 
         [HttpGet("{orderId}")]
+        [Authorize]
         public async Task<IActionResult> GetOrder(Guid orderId)
         {
             try
@@ -83,20 +82,57 @@ namespace AD_Coursework.Controllers
             }
         }
 
-        [HttpPost("{orderId}/cancel")]
-        [Authorize(Roles = "Member")]
-        public async Task<IActionResult> CancelOrder(Guid orderId, [FromBody] string cancellationReason)
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllOrdersCount()
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(cancellationReason))
-                {
-                    return Error("Cancellation reason is required.", StatusCodes.Status400BadRequest);
-                }
+                var orderCount = await _orderService.GetOrderCount();
+                return Success(orderCount, "All orders has been retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving orders for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't retrieve your orders. Please try again later.");
+            }
+        }
 
+        [HttpPost("{orderId}/cancel")]
+        [Authorize(Roles = "Member")]
+        public async Task<IActionResult> CancelOrder(Guid orderId)
+        {
+            try
+            {
                 var userId = User.GetUserId();
-                var order = await _orderService.CancelOrderAsync(userId, orderId, cancellationReason);
+                var order = await _orderService.CancelOrderAsync(userId, orderId);
                 return Success(order, "Your order has been cancelled successfully.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Order not found while cancelling for user ID: {User.GetUserId()}");
+                return Error("Order not found.", StatusCodes.Status404NotFound);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation while cancelling order for user ID: {User.GetUserId()}");
+                return Error(ex.Message, StatusCodes.Status400BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while cancelling order for user ID: {User.GetUserId()}");
+                return HandleException(ex, "We couldn't cancel your order. Please try again later.");
+            }
+        }
+
+        [HttpPost("{orderId}/placeagain")]
+        [Authorize(Roles = "Member")]
+        public async Task<IActionResult> PlaceOrderAgain(Guid orderId)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var order = await _orderService.PlaceOrderAgain(userId, orderId);
+                return Success<Object>(null, "Your order has been cancelled successfully.");
             }
             catch (KeyNotFoundException ex)
             {
@@ -143,6 +179,22 @@ namespace AD_Coursework.Controllers
             {
                 _logger.LogError(ex, $"An error occurred while processing order for user ID: {userId}");
                 return HandleException(ex, "We couldn't process this order. Please try again later.");
+            }
+        }
+
+        [HttpGet("all-orders")]
+        [Authorize(Roles = "Staff,Admin")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            try
+            {
+                var orders = await _orderService.GetAllOrdersAsync();
+                return Success(orders, "All orders retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving all orders");
+                return HandleException(ex, "We couldn't retrieve all orders. Please try again later.");
             }
         }
 

@@ -86,7 +86,8 @@ namespace AD_Coursework.Repositories
         {
             return await _context.OrderItems
                 .Include(oi => oi.Order)
-                .AnyAsync(oi => oi.BookId == bookId && oi.Order.UserId == userId && oi.Order.Status == OrderStatus.Completed);
+                .AnyAsync(oi => oi.BookId == bookId &&
+                            oi.Order.UserId == userId);
         }
     }
 }

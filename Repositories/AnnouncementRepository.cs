@@ -62,13 +62,5 @@ namespace AD_Coursework.Repositories
                 .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
         }
-
-        public async Task<IEnumerable<Announcement>> GetByTypeAsync(AnnouncementType type)
-        {
-            return await _context.Announcements
-                .Where(a => a.Type == type)
-                .OrderByDescending(a => a.CreatedAt)
-                .ToListAsync();
-        }
     }
 }

@@ -11,7 +11,6 @@ namespace AD_Coursework.Interfaces.Services
         Task<AnnouncementDto?> UpdateAnnouncementAsync(Guid id, AnnouncementUpdateDto updateDto);
         Task<bool> DeleteAnnouncementAsync(Guid id);
         Task<IEnumerable<AnnouncementDto>> GetActiveAnnouncementsAsync();
-        Task<IEnumerable<AnnouncementDto>> GetByTypeAsync(AnnouncementType type);
         Task BroadcastAnnouncementAsync(Guid announcementId);
     }
 }

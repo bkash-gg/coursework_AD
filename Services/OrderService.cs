@@ -28,7 +28,13 @@ namespace AD_Coursework.Services
             _emailService = emailService;
         }
 
-        public async Task<OrderDto> PlaceOrderAsync(Guid userId, OrderCreateDto orderCreateDto)
+        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+        {
+            var orders = await _orderRepository.GetAllOrdersAsync();
+            return orders.Select(MapToOrderDto);
+        }
+
+        public async Task<OrderDto> PlaceOrderAsync(Guid userId)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
             if (cart == null || !cart.Items.Any())
@@ -77,12 +83,7 @@ namespace AD_Coursework.Services
                 TotalAmount = totalAmount,
                 UsedBulkDiscount = usedBulkDiscount,
                 UsedLoyaltyDiscount = usedLoyaltyDiscount,
-                ClaimCode = GenerateClaimCode(),
-                PickupNotes = orderCreateDto.PickupNotes,
-                PickupDate = orderCreateDto.PickupDate.HasValue
-                ? DateTime.SpecifyKind(orderCreateDto.PickupDate.Value, DateTimeKind.Utc)
-                : (DateTime?)null,
-                PaymentMethod = orderCreateDto.PaymentMethod
+                ClaimCode = GenerateClaimCode()
             };
 
             foreach (var cartItem in cart.Items)
@@ -91,7 +92,8 @@ namespace AD_Coursework.Services
                 {
                     BookId = cartItem.BookId,
                     Quantity = cartItem.Quantity,
-                    UnitPrice = cartItem.UnitPrice
+                    UnitPrice = cartItem.UnitPrice,
+                    LineTotal = cartItem.Quantity * cartItem.UnitPrice
                 });
             }
 
@@ -128,7 +130,7 @@ namespace AD_Coursework.Services
             return orders.Select(MapToOrderDto);
         }
 
-        public async Task<OrderDto> CancelOrderAsync(Guid userId, Guid orderId, string cancellationReason)
+        public async Task<OrderDto> CancelOrderAsync(Guid userId, Guid orderId)
         {
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
             if (order == null || order.UserId != userId)
@@ -143,10 +145,29 @@ namespace AD_Coursework.Services
 
             order.Status = OrderStatus.Cancelled;
             order.CancellationDate = DateTime.UtcNow;
-            order.CancellationReason = cancellationReason;
 
             var updatedOrder = await _orderRepository.UpdateOrderAsync(order);
             return MapToOrderDto(updatedOrder);
+        }
+
+        public async Task<bool> PlaceOrderAgain(Guid userId, Guid orderId)
+        {
+            var order = await _orderRepository.GetOrderByIdAsync(orderId);
+            if (order == null || order.UserId != userId)
+            {
+                throw new KeyNotFoundException("Order not found");
+            }
+
+            if (order.Status != OrderStatus.Cancelled)
+            {
+                throw new InvalidOperationException("Only cancelled orders can be placed again");
+            }
+
+            order.Status = OrderStatus.Pending;
+            order.CancellationDate = DateTime.UtcNow;
+
+            var updatedOrder = await _orderRepository.UpdateOrderAsync(order);
+            return true;
         }
 
         public async Task<OrderDto> ProcessOrderAsync(Guid userId, string claimCode)
@@ -179,7 +200,6 @@ namespace AD_Coursework.Services
             }
 
             order.Status = OrderStatus.Completed;
-            order.CompletionDate = DateTime.UtcNow;
 
             var updatedOrder = await _orderRepository.UpdateOrderAsync(order);
             return MapToOrderDto(updatedOrder);
@@ -190,6 +210,10 @@ namespace AD_Coursework.Services
             return Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
         }
 
+        public async Task<int> GetOrderCount()
+        {
+            return await _orderRepository.GetCompletedOrderCountAsync();
+        }
         private OrderDto MapToOrderDto(Order order)
         {
             return new OrderDto
@@ -204,12 +228,7 @@ namespace AD_Coursework.Services
                 UsedBulkDiscount = order.UsedBulkDiscount,
                 UsedLoyaltyDiscount = order.UsedLoyaltyDiscount,
                 ClaimCode = order.ClaimCode,
-                PickupNotes = order.PickupNotes,
-                PickupDate = order.PickupDate,
-                PaymentMethod = order.PaymentMethod,
                 CancellationDate = order.CancellationDate,
-                CancellationReason = order.CancellationReason,
-                CompletionDate = order.CompletionDate,
                 UserId = order.UserId,
                 UserFullName = order.User?.FullName ?? string.Empty,
                 OrderItems = order.OrderItems.Select(oi => new OrderItemDto

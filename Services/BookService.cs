@@ -1,8 +1,11 @@
-﻿using AD_Coursework.DTOs.Book;
+﻿using AD_Coursework.Data;
+using AD_Coursework.DTOs.Book;
+using AD_Coursework.DTOs.Review;
 using AD_Coursework.Interfaces.Repositories;
 using AD_Coursework.Interfaces.Services;
 using AD_Coursework.Models;
 using AD_Coursework.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace AD_Coursework.Services
 {
@@ -12,13 +15,15 @@ namespace AD_Coursework.Services
         private readonly IPublisherRepository _publisherRepository;
         private readonly IAuthorRepository _authorRepository;
         private readonly IGenreRepository _genreRepository;
+        private readonly ApplicationDbContext _context;
 
-        public BookService(IBookRepository bookRepository, IPublisherRepository publisherRepository, IAuthorRepository authorRepository, IGenreRepository genreRepository)
+        public BookService(IBookRepository bookRepository, IPublisherRepository publisherRepository, IAuthorRepository authorRepository, IGenreRepository genreRepository, ApplicationDbContext context)
         {
             _bookRepository = bookRepository;
             _publisherRepository = publisherRepository;
             _authorRepository = authorRepository;
             _genreRepository = genreRepository;
+            _context = context;
         }
 
         public async Task<(IEnumerable<BookDto> Books, int TotalCount)> GetAllAsync(int page, int pageSize)
@@ -65,7 +70,7 @@ namespace AD_Coursework.Services
             return (bookDtos, totalCount);
         }
 
-        public async Task<BookDto?> GetByIdAsync(Guid id)
+        public async Task<BookDto?> GetByIdAsync(Guid id, Guid userId)
         {
             var book = await _bookRepository.GetBookByIdAsync(id);
             if (book == null) return null;
@@ -73,6 +78,9 @@ namespace AD_Coursework.Services
             var currentDate = DateTime.UtcNow;
 
             var activeDiscounts = await _bookRepository.GetActiveDiscountsAsync(currentDate);
+
+            var isPurchased = await _context.OrderItems
+                .AnyAsync(oi => oi.BookId == id && oi.Order.UserId == userId);
 
             var bookDto = new BookDto
             {
@@ -93,7 +101,16 @@ namespace AD_Coursework.Services
                 AuthorName = book.Author?.Name ?? string.Empty,
                 Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
                 CreatedAt = book.CreatedAt,
-                DiscountPercentage = 0
+                DiscountPercentage = 0,
+                IsPurchasedByUser = isPurchased,
+                Reviews = book.Reviews.Select(r => new ReviewDto
+                {
+                    Id = r.Id,
+                    FullName = r.User?.FullName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt
+                }).ToList()
             };
             var activeDiscount = activeDiscounts.FirstOrDefault(d => d.BookId == book.Id);
             if (activeDiscount != null)

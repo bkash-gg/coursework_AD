@@ -73,10 +73,11 @@ namespace AD_Coursework.Services
                 throw new ArgumentException("Invalid Book ID.");
             }
 
+            // Check if user has purchased the book
             var hasPurchased = await _reviewRepository.HasUserPurchasedBookAsync(reviewCreateDto.UserId, reviewCreateDto.BookId);
             if (!hasPurchased)
             {
-                throw new InvalidOperationException("User must purchase the book before reviewing.");
+                throw new InvalidOperationException("You must purchase this book before submitting a review.");
             }
 
             var review = new Review

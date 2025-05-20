@@ -12,6 +12,5 @@ namespace AD_Coursework.Interfaces.Repositories
         Task<Announcement> UpdateAsync(Announcement entity);
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<Announcement>> GetActiveAnnouncementsAsync();
-        Task<IEnumerable<Announcement>> GetByTypeAsync(AnnouncementType type);
     }
 }

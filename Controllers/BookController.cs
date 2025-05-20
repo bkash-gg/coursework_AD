@@ -2,6 +2,7 @@
 using AD_Coursework.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using AD_Coursework.DTOs.Book;
+using AD_Coursework.Extensions;
 
 namespace AD_Coursework.Controllers
 {
@@ -44,7 +45,8 @@ namespace AD_Coursework.Controllers
         {
             try
             {
-                var book = await _bookService.GetByIdAsync(id);
+                var userId = User.GetUserId();
+                var book = await _bookService.GetByIdAsync(id, userId);
                 if (book == null)
                 {
                     return Error("We couldn't find the book you're looking for.", StatusCodes.Status404NotFound);

@@ -17,9 +17,11 @@ namespace AD_Coursework.Repositories
             _userManager = userManager;
         }
 
-        public async Task<User?> GetUserByIdAsync(Guid id)
+        public async Task<User?> GetUserByIdAsync(Guid userId)
         {
-            return await _userManager.FindByIdAsync(id.ToString());
+            return await _context.Users
+                .Include(u => u.Orders) 
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)

@@ -18,6 +18,31 @@ namespace AD_Coursework.Controllers
             _authService = authService;
         }
 
+        // Gets the profile information of the logged-in user
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                var result = await _authService.GetProfileAsync(userId);
+
+                if (!result.IsSuccess || result.Data == null)
+                {
+                    return Error(result.Message ?? "Couldn't retrieve your profile information.", StatusCodes.Status400BadRequest);
+                }
+
+                return Success(result.Data, "Profile retrieved successfully!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving profile.");
+                return HandleException(ex, "We couldn't retrieve your profile information. Please try again.");
+            }
+        }
+
         // Changes the password for the logged-in user
         [Authorize]
         [HttpPost("change-password")]
@@ -75,7 +100,7 @@ namespace AD_Coursework.Controllers
                     role = result.Role
                 };
 
-                return Success(flattenedResponse, "Your profile has been updated successfully!");
+                return Success<Object>(null, "Your profile has been updated successfully!");
             }
             catch (Exception ex)
             {

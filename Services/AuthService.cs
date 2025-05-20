@@ -126,6 +126,18 @@ namespace AD_Coursework.Services
             user.RefreshTokenExpiry = refreshTokenExpiry;
             await _userManager.UpdateAsync(user);
 
+            var userDto = new UserDto
+            {
+                Username = user.UserName,
+                Email = user.Email,
+                FullName = user.FullName,
+                RegistrationDate = user.RegistrationDate,
+                Address = user.Address,
+                TotalOrdersCompleted = user.TotalOrdersCompleted,
+                IsEligibleForLoyaltyDiscount = user.IsEligibleForLoyaltyDiscount
+            };
+
+
             return new UserLoginResponseDto
             {
                 AuthResponse = new AuthResponseDto
@@ -133,7 +145,8 @@ namespace AD_Coursework.Services
                     Token = token,
                     RefreshToken = refreshToken,
                     UserId = user.Id.ToString(), 
-                    Role = role,                 
+                    Role = role,
+                    Email = user.Email,
                     IsSuccess = true,
                     Message = "Login successful."
                 }
@@ -347,6 +360,36 @@ namespace AD_Coursework.Services
             {
                 user.RefreshToken = null;
                 await _userManager.UpdateAsync(user);
+            }
+        }
+
+        public async Task<ServiceResponse<UserDto>> GetProfileAsync(Guid userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return ServiceResponse<UserDto>.Failure("User not found");
+                }
+                int completedOrdersCount = user.Orders.Count(o => o.Status == OrderStatus.Completed);
+                var userDto = new UserDto
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    RegistrationDate = user.RegistrationDate,
+                    PhoneNumber = user.PhoneNumber,
+                    Address = user.Address,
+                    TotalOrdersCompleted = completedOrdersCount
+                };
+               
+                return ServiceResponse<UserDto>.Success(userDto);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResponse<UserDto>.Failure("Error retrieving profile");
             }
         }
     }
